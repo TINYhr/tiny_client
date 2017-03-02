@@ -48,12 +48,13 @@ module TinyClient
       end
 
       # POST /<resource_path>.json
-      # Create a new resource
+      # Create a new resource. The resource will be indexed by it's name.
       # @param [Object] content the resource/attributes to be created.
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       # @return the created resource
       def create(content)
-        post(nil, nil, content, self)
+        data = { low_name => content }
+        post(nil, nil, data, self)
       end
 
       # DELETE /<resource_path>/{id}
@@ -82,11 +83,11 @@ module TinyClient
 
       # POST /<path>/{id}/<name>
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-      def post(id, name, content, resource_class)
+      def post(id, name, data, resource_class)
         url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).build!
         resp = perform_post(url, { 'Accept' => 'application/json',
                                    'Content-Type' => 'application/json'
-                                }.merge!(@conf.headers), content.to_json)
+                                }.merge!(@conf.headers), data.to_json)
         raise ResponseError.new(resp) if resp.error?
         resp.to_object(resource_class)
       end
@@ -97,12 +98,23 @@ module TinyClient
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       # @return the updated resource
       def update(id, content)
-        url = UrlBuilder.url(@conf.url).path(@path).path(id).build!
+        data = { low_name => content }
+        put(id, nil, data, self)
+      end
+
+      # PUT /<path>/{id}/<name>
+      # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+      def put(id, name, data, resource_class)
+        url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).build!
         resp = perform_put(url, { 'Accept' => 'application/json',
                                   'Content-Type' => 'application/json'
-                                }.merge!(@conf.headers), content.to_json)
+                                }.merge!(@conf.headers), data.to_json)
         raise ResponseError.new(resp) if resp.error?
-        resp.to_object(self)
+        resp.to_object(resource_class)
+      end
+
+      def low_name
+        @low_name ||= name.demodulize.downcase
       end
     end
 
@@ -130,12 +142,10 @@ module TinyClient
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
     # @return [Resource] the updated resource
     def save!
-      # resource object start is identified by it's class name
-      data = { self.class.name.demodulize.downcase => changed_attributes }
       saved = if id.present?
-                self.class.update(id, data)
+                self.class.update(id, changed_attributes)
               else
-                self.class.create(data)
+                self.class.create(changed_attributes)
               end
       clone_fields(saved)
       @changes.clear
@@ -164,7 +174,8 @@ module TinyClient
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
     def create_nested(resource)
       raise ArgumentError, 'resource must be an instance of TinyClient::Resource' unless resource.is_a? Resource
-      self.class.post(@id, resource.class.path, resource, resource.class)
+      data = { resource.class.low_name => resource.to_h }
+      self.class.post(@id, resource.class.path, data, resource.class)
     end
 
     # @return [Hash] an hash representation of this resource fields.

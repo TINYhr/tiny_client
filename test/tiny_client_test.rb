@@ -23,6 +23,24 @@ describe TinyClient do
       it { response.first.must_be_instance_of Dummy::Post }
       it { response.first.to_h.must_equal posts[0] }
     end
+
+    describe '#add_post' do
+      let(:post) { Dummy::Post.new('toto', 'tata') }
+      let(:response) { author.add_post(post) }
+      before do
+        author.id = 1
+        stub_request(:post, Dummy::Config.instance.url + '/authors/1/posts.json').to_return(body: post.to_json)
+        response
+      end
+
+      it { response.must_be_instance_of Dummy::Post }
+      it { response.name.must_equal post.name }
+      it { response.content.must_equal post.content }
+      it 'create a new post for this author' do
+        assert_requested :post, "#{Dummy::Config.instance.url}/authors/1/posts.json",
+                         body: { post: post.to_h }.to_json
+      end
+    end
   end
 
   describe 'Dummy Post' do
@@ -57,7 +75,7 @@ describe TinyClient do
 
     describe '#self.create' do
       let(:body) { { post: { id: 1, name: 'tata', content: 'blabla' } } }
-      let(:response) { Dummy::Post.create(body) }
+      let(:response) { Dummy::Post.create(body[:post]) }
       before do
         stub_request(:post, Dummy::Config.instance.url + '/posts.json').to_return(body: '{}')
         response
