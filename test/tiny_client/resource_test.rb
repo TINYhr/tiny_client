@@ -2,7 +2,6 @@ require 'test_helper'
 require 'dummy/post'
 
 describe TinyClient::Resource do
-
   describe 'Dummy Post project' do
     let(:post) { Dummy::Post.new }
 
@@ -19,7 +18,8 @@ describe TinyClient::Resource do
         before do
           post.name = 'toto'
           post.content = 'tata'
-          stub_request(:post, Dummy::Config.instance.url + '/posts.json').to_return(body: post.to_json)
+          stub_request(:post, Dummy::Config.instance.url + '/posts.json')
+            .to_return(body: post.to_json)
           response
         end
         it { response.must_be_instance_of Dummy::Post }
