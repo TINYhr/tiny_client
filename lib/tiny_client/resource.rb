@@ -20,7 +20,7 @@ module TinyClient
       # Set the resource path, default is the class name in lower case.
       # @param [String] the resource path
       def path(path = nil)
-        @path ||= path || name.demodulize.downcase
+        @path ||= path || low_name
       end
 
       # @param [*String] names the resource field names
