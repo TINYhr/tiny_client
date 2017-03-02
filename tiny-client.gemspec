@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name    = "tiny-client"
-  s.authors = ["SWAT"]
+  s.authors = ["TINYpulse team"]
   s.version = '0.1.0'
   s.date    = '2017-02-22'
   s.description = %q{TINYclient, an HTTP/JSON crud client toolkit.}
