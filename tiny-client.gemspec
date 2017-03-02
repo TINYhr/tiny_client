@@ -7,15 +7,12 @@ Gem::Specification.new do |s|
   s.email   = 'swat@tinypulse.com'
   s.extra_rdoc_files = ['LICENSE', 'README.md']
 
-  s.files = ["LICENSE", "README.md", "Rakefile", "doc.rb", "lib/*.rb"]
+  s.files = ["LICENSE", "README.md", "Rakefile", "lib/tiny_client.rb"]
   #### Load-time details
   s.require_paths = ['lib','ext']
   s.rubyforge_project = 'tiny-client'
   s.summary = %q{TINYclient, an HTTP/JSON crud client toolkit.}
-  s.test_files = ['test/tiny_client/*']
-
- s.extensions << 'ext/extconf.rb'
-
+  s.test_files = ['test/tiny_client/']
 
 #### Documentation and testing.
  s.has_rdoc = true

@@ -9,6 +9,6 @@ group :test, :development do
   gem 'minitest'
   gem 'mocha'
   gem 'webmock'
-  gem 'rdoc'
+  gem 'yard'
   gem 'byebug'
 end
