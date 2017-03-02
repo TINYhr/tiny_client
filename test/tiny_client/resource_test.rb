@@ -6,7 +6,8 @@ describe TinyClient::Resource do
   describe 'Dummy Post project' do
     let(:post) { Dummy::Post.new }
 
-    it { post.path.must_equal 'posts' }
+    it { Dummy::Post.path.must_equal 'posts' }
+    it { Dummy::Post.fields.must_equal [:id, :name, :content] }
     it { post.must_respond_to :id }
     it { post.must_respond_to :name }
     it { post.must_respond_to :content }

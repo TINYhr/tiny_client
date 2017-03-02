@@ -24,7 +24,6 @@ module TinyClient
 
       # GET /<resource_path>.json
       def index(params = {})
-        # get on the resource path (i.e index)
         get(nil, nil, params, self)
       end
 
@@ -45,7 +44,6 @@ module TinyClient
 
       # GET /<resource_path>/{id}
       def show(id, params = {})
-        # GET on the resource id, i.e path/id
         get(id, nil, params, self)
       end
 
@@ -105,8 +103,8 @@ module TinyClient
       reloaded
     end
 
-    def get(member, params = {}, options = {})
-      self.class.get(@id, member, params, options)
+    def get(member, params = {}, resource_class = nil)
+      self.class.get(@id, member, params, resource_class)
     end
 
     def to_h
@@ -118,14 +116,6 @@ module TinyClient
 
     def to_json
       to_h.to_json
-    end
-
-    def path
-      self.class.path
-    end
-
-    def fields
-      self.class.fields
     end
 
     protected
