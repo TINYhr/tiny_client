@@ -7,10 +7,8 @@ module TinyClient
     private
 
     def initialize
-      @url = 'http://localhost:3000/api/1.0'
+      @url = ''
       @headers = {
-        'Content-Type' => 'application/json',
-        'Accept' => 'application/json',
         'User-Agent' => 'TINYpulse client 1.0'
       }
     end
