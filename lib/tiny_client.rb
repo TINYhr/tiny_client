@@ -5,6 +5,6 @@ require 'tiny_client/resource'
 require 'tiny_client/url_builder'
 require 'tiny_client/configuration'
 
+# Placeholder
 module TinyClient
-
 end
