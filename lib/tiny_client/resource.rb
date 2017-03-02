@@ -22,15 +22,20 @@ module TinyClient
         @fields
       end
 
-      # GET /<resource_path>
-      def index(params = {}, resource_class: nil)
+      # GET /<resource_path>.json
+      def index(params = {})
         # get on the resource path (i.e index)
-        get(nil, nil, params, resource_class: resource_class)
+        get(nil, nil, params, self)
       end
 
-      # POST /<resource_path>
-      def create(_params)
-        raise NotImplementedError
+      # POST /<resource_path>.json
+      def create(content = {})
+        url = UrlBuilder.url(@conf.url).path(@path).build!
+        resp = perform_post(url, { 'Accept' => 'application/json',
+                                   'Content-Type' => 'application/json'
+                                }.merge!(@conf.headers), content.to_json)
+        raise ResponseError.new(resp) if resp.error?
+        resp.to_object(self)
       end
 
       # DELETE /<resource_path>/{id}
@@ -41,23 +46,27 @@ module TinyClient
       # GET /<resource_path>/{id}
       def show(id, params = {})
         # GET on the resource id, i.e path/id
-        get(id, nil, params, resource_class: self)
+        get(id, nil, params, self)
       end
 
       # GET /<resource_path/{id}/<name>
-      def get(id, name, params = {}, resource_class: nil)
+      def get(id, name, params = {}, resource_class = nil)
         url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).query(params).build!
-        resp = perform_request(url, @conf.headers)
+        resp = perform_get(url, { 'Accept' => 'application/json',
+                                  'Content-Type' => 'application/x-www-form-urlencoded'
+                                }.merge!(@conf.headers))
         raise ResponseError.new(resp) if resp.error?
         resp.to_object(resource_class || self)
       end
 
       # PUT /<resource_path>/{id}
-      def update(id, params)
+      def update(id, content)
         url = UrlBuilder.url(@conf.url).path(@path).path(id).build!
-        resp = perform_request(url, @conf.headers, put_data: params.to_json)
+        resp = perform_put(url, { 'Accept' => 'application/json',
+                                  'Content-Type' => 'application/json'
+                                }.merge!(@conf.headers), content.to_json)
         raise ResponseError.new(resp) if resp.error?
-        resp.to_object(resource_class || self)
+        resp.to_object(self)
       end
     end
 
@@ -71,12 +80,16 @@ module TinyClient
       @changes = Set.new
     end
 
-    # Save this resource attributes that has changed!
+    # Save this resource attributes that has changed, or create it, if it's a new one!
     # It will do a PUT request (:update)
-    def update!
+    def save!
       # resource object start is identified by it's class name
       data = { self.class.name.demodulize.downcase => changed_attributes }
-      saved = self.class.update(@id, data)
+      saved = if id.present?
+                self.class.update(id, data)
+              else
+                self.class.create(data)
+              end
       clone_fields(saved)
       @changes.clear
       self
@@ -97,7 +110,14 @@ module TinyClient
     end
 
     def to_h
-      self.class.fields.each_with_object({}) { |name, h| h[name] = instance_variable_get("@#{name}") }
+      self.class.fields.each_with_object({}) do |name, h|
+        value = instance_variable_get("@#{name}")
+        h[name] = value if value.present?
+      end
+    end
+
+    def to_json
+      to_h.to_json
     end
 
     def path
@@ -122,7 +142,9 @@ module TinyClient
     end
 
     def changed_attributes
-      to_h.select { |k, _v| @changes.include?(k) }
+      @changes.each_with_object({}) do |k, h|
+        h[k] = instance_variable_get("@#{k}")
+      end
     end
   end
 end
