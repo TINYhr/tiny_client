@@ -3,7 +3,7 @@ require 'yard'
 
 Rake::TestTask.new do |t|
   t.libs << 'test'
-  t.test_files = FileList['test/tiny_client/*_test.rb']
+  t.test_files = FileList['test/tiny_client/*_test.rb', 'test/tiny_client_test.rb']
 end
 
 YARD::Rake::YardocTask.new do |t|

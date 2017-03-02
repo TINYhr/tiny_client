@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'dummy/post'
 
-describe TinyClient::Resource do
+describe TinyClient do
   describe 'Dummy Post project' do
     let(:post) { Dummy::Post.new }
 
