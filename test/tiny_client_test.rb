@@ -29,7 +29,7 @@ describe TinyClient do
       let(:response) { author.add_post(post) }
       before do
         author.id = 1
-        stub_request(:post, Dummy::Config.instance.url + '/authors/1/posts.json').to_return(body: post.to_json)
+        stub_request(:post, Dummy::Config.instance.url + '/authors/1/posts.json').to_return(body: post.to_json(false))
         response
       end
 
@@ -60,7 +60,7 @@ describe TinyClient do
           post.name = 'toto'
           post.content = 'tata'
           stub_request(:post, Dummy::Config.instance.url + '/posts.json')
-            .to_return(body: post.to_json)
+            .to_return(body: post.to_json(false))
           response
         end
         it { response.must_be_instance_of Dummy::Post }

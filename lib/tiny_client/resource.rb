@@ -53,7 +53,7 @@ module TinyClient
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       # @return the created resource
       def create(content)
-        data = { low_name => content }
+        data = { low_name => content.to_h }
         post(nil, nil, data, self)
       end
 
@@ -98,7 +98,7 @@ module TinyClient
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       # @return the updated resource
       def update(id, content)
-        data = { low_name => content }
+        data = { low_name => content.to_h }
         put(id, nil, data, self)
       end
 
@@ -127,9 +127,8 @@ module TinyClient
       end
 
       self.class.nested.each do |clazz|
-        name = clazz.name.demodulize.downcase
-        send(:define_singleton_method, "#{name}s") { |params = {}| get_nested(clazz, params) }
-        send(:define_singleton_method, "add_#{name}") { |resource| create_nested(resource) }
+        send(:define_singleton_method, "#{clazz.low_name}s") { |params = {}| get_nested(clazz, params) }
+        send(:define_singleton_method, "add_#{clazz.low_name}") { |resource| create_nested(resource) }
       end
 
       @changes = Set.new
@@ -187,8 +186,12 @@ module TinyClient
     end
 
     # @return [String] a json representation of this resource
-    def to_json
-      to_h.to_json
+    def to_json(prefixed = true)
+      if prefixed
+        { self.class.low_name => to_h }.to_json
+      else
+        to_h.to_json
+      end
     end
 
     protected
