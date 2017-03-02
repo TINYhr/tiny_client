@@ -22,19 +22,18 @@ module TinyClient
         @fields
       end
 
+      def nested(*clazz)
+        @nested ||= clazz
+      end
+
       # GET /<resource_path>.json
       def index(params = {})
         get(nil, nil, params, self)
       end
 
       # POST /<resource_path>.json
-      def create(content = {})
-        url = UrlBuilder.url(@conf.url).path(@path).build!
-        resp = perform_post(url, { 'Accept' => 'application/json',
-                                   'Content-Type' => 'application/json'
-                                }.merge!(@conf.headers), content.to_json)
-        raise ResponseError.new(resp) if resp.error?
-        resp.to_object(self)
+      def create(content)
+        post(nil, nil, content, self)
       end
 
       # DELETE /<resource_path>/{id}
@@ -48,13 +47,23 @@ module TinyClient
       end
 
       # GET /<resource_path/{id}/<name>
-      def get(id, name, params = {}, resource_class = nil)
+      def get(id, name, params, resource_class)
         url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).query(params).build!
         resp = perform_get(url, { 'Accept' => 'application/json',
                                   'Content-Type' => 'application/x-www-form-urlencoded'
                                 }.merge!(@conf.headers))
         raise ResponseError.new(resp) if resp.error?
-        resp.to_object(resource_class || self)
+        resp.to_object(resource_class)
+      end
+
+      # POST /<resource_path>/{id}/<name>
+      def post(id, name, content, resource_class)
+        url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).build!
+        resp = perform_post(url, { 'Accept' => 'application/json',
+                                   'Content-Type' => 'application/json'
+                                }.merge!(@conf.headers), content.to_json)
+        raise ResponseError.new(resp) if resp.error?
+        resp.to_object(resource_class)
       end
 
       # PUT /<resource_path>/{id}
@@ -75,6 +84,19 @@ module TinyClient
           @changes << name
         end
       end
+
+      self.class.nested.each do |clazz|
+        name = clazz.name.demodulize.downcase
+
+        send(:define_singleton_method, "#{name}s") do |params = {}|
+          get_nested(clazz, params)
+        end
+
+        send(:define_singleton_method, "add_#{name}") do |resource|
+          create_nested(resource)
+        end
+      end
+
       @changes = Set.new
     end
 
@@ -103,8 +125,13 @@ module TinyClient
       reloaded
     end
 
-    def get(member, params = {}, resource_class = nil)
-      self.class.get(@id, member, params, resource_class)
+    def get_nested(resource_class, params = {})
+      self.class.get(@id, resource_class.path, params, resource_class)
+    end
+
+    def create_nested(resource)
+      raise ArgumentError, 'resource must be an instance of TinyClient::Resource' unless resource.is_a? Resource
+      self.class.post(@id, resource.class.path, resource, resource.class)
     end
 
     def to_h

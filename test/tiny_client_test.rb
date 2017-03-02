@@ -1,8 +1,31 @@
 require 'test_helper'
 require 'dummy/post'
+require 'dummy/author'
 
 describe TinyClient do
-  describe 'Dummy Post project' do
+  describe 'Dummy Author' do
+    let(:author) { Dummy::Author.new }
+
+    it { author.class.nested.must_equal [Dummy::Post] }
+    it { author.must_respond_to :add_post }
+    it { author.must_respond_to :posts }
+
+    describe '#posts' do
+      let(:posts) { [{ id: 1, name: 'toto' }] }
+      let(:response) { author.posts }
+      before do
+        author.id = 1
+        stub_request(:get, Dummy::Config.instance.url + '/authors/1/posts.json').to_return(body: posts.to_json)
+        response
+      end
+
+      it { response.count.must_equal 1 }
+      it { response.first.must_be_instance_of Dummy::Post }
+      it { response.first.to_h.must_equal posts[0] }
+    end
+  end
+
+  describe 'Dummy Post' do
     let(:post) { Dummy::Post.new }
 
     it { Dummy::Post.path.must_equal 'posts' }
