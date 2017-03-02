@@ -1,19 +1,29 @@
 require 'set'
 
 module TinyClient
-  # Extend to create a simple client for a given resource.
+  # @markup markdown
+  # This is the core of TinyClient.
+  # Subclass {TinyClient::Resource} in order to create an HTTP/JSON tiny client.
+  #
+  # {file:README.md Getting Started}
+  # @author @barjo
   class Resource
     class << self
       include CurbRequestor
 
+      # Set this resource client configuration
+      # @param [Configuration] config the api url and client default headers.
       def conf(config)
         @conf ||= config
       end
 
+      # Set the resource path, default is the class name in lower case.
+      # @param [String] the resource path
       def path(path = nil)
         @path ||= path || name.demodulize.downcase
       end
 
+      # @param [*String] names the resource field names
       def fields(*names)
         unless @fields.present?
           attr_reader(*names)
@@ -22,16 +32,26 @@ module TinyClient
         @fields
       end
 
+      # Set nested resources. Nested resource creation and getters method will be created.
+      # If the resource class is called Post, then {add_post} and {posts} methods will be created.
+      # @param [Resource] clazz the nested resource class.
       def nested(*clazz)
         @nested ||= clazz
       end
 
-      # GET /<resource_path>.json
+      # GET /<path>.json
+      # @param [Hash] optional query parameters
+      # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+      # @return the list of resources available at this path.
       def index(params = {})
         get(nil, nil, params, self)
       end
 
       # POST /<resource_path>.json
+      # Create a new resource
+      # @param [Object] content the resource/attributes to be created.
+      # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+      # @return the created resource
       def create(content)
         post(nil, nil, content, self)
       end
@@ -42,11 +62,15 @@ module TinyClient
       end
 
       # GET /<resource_path>/{id}
+      # @param [String, Integer] id the resource id
+      # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+      # @return the resource available at that path
       def show(id, params = {})
         get(id, nil, params, self)
       end
 
-      # GET /<resource_path/{id}/<name>
+      # GET /<path>/{id}/<name>
+      # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       def get(id, name, params, resource_class)
         url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).query(params).build!
         resp = perform_get(url, { 'Accept' => 'application/json',
@@ -56,7 +80,8 @@ module TinyClient
         resp.to_object(resource_class)
       end
 
-      # POST /<resource_path>/{id}/<name>
+      # POST /<path>/{id}/<name>
+      # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       def post(id, name, content, resource_class)
         url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).build!
         resp = perform_post(url, { 'Accept' => 'application/json',
@@ -66,7 +91,11 @@ module TinyClient
         resp.to_object(resource_class)
       end
 
-      # PUT /<resource_path>/{id}
+      # Will query PUT /<path>/{id}
+      # @param [String, Integer] id the id of the resource that needs to be updated
+      # @param [Object] the updated attributes/fields/resource
+      # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+      # @return the updated resource
       def update(id, content)
         url = UrlBuilder.url(@conf.url).path(@path).path(id).build!
         resp = perform_put(url, { 'Accept' => 'application/json',
@@ -87,21 +116,19 @@ module TinyClient
 
       self.class.nested.each do |clazz|
         name = clazz.name.demodulize.downcase
-
-        send(:define_singleton_method, "#{name}s") do |params = {}|
-          get_nested(clazz, params)
-        end
-
-        send(:define_singleton_method, "add_#{name}") do |resource|
-          create_nested(resource)
-        end
+        send(:define_singleton_method, "#{name}s") { |params = {}| get_nested(clazz, params) }
+        send(:define_singleton_method, "add_#{name}") { |resource| create_nested(resource) }
       end
 
       @changes = Set.new
     end
 
-    # Save this resource attributes that has changed, or create it, if it's a new one!
-    # It will do a PUT request (:update)
+    # Save the resource fields that has changed, or create it, if it's a new one!
+    #    Create the a new resource if id is not set or update the corresonding resource.
+    #    Create is done by calling POST on the resource path
+    #    Update is done by calling PUT on the resource id ( path/id )
+    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+    # @return [Resource] the updated resource
     def save!
       # resource object start is identified by it's class name
       data = { self.class.name.demodulize.downcase => changed_attributes }
@@ -115,8 +142,12 @@ module TinyClient
       self
     end
 
-    # Load this resources attributes from the server.
+    # Load/Reload this resource from the server.
+    # It will reset all fields that has been retrieved through the request.
     # It will do a GET request on the resource id (:show)
+    # @param [Hash] params optional query parameters
+    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+    # @return self with updated fields.
     def load!(params = {})
       # get the values from the persistence layer
       reloaded = self.class.show(@id, params)
@@ -125,15 +156,18 @@ module TinyClient
       reloaded
     end
 
+    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
     def get_nested(resource_class, params = {})
       self.class.get(@id, resource_class.path, params, resource_class)
     end
 
+    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
     def create_nested(resource)
       raise ArgumentError, 'resource must be an instance of TinyClient::Resource' unless resource.is_a? Resource
       self.class.post(@id, resource.class.path, resource, resource.class)
     end
 
+    # @return [Hash] an hash representation of this resource fields.
     def to_h
       self.class.fields.each_with_object({}) do |name, h|
         value = instance_variable_get("@#{name}")
@@ -141,6 +175,7 @@ module TinyClient
       end
     end
 
+    # @return [String] a json representation of this resource
     def to_json
       to_h.to_json
     end
