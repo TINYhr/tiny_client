@@ -8,7 +8,7 @@ TINYclient is based on [Curb](https://github.com/taf2/curb).
 * Be sure that Curb/Curl works properly on your machine.
 * install the gem
 
-```
+```sh
 gem install tiny-client
 ```
 
@@ -20,7 +20,7 @@ gem install tiny-client
 You can initialize your API by extending the `TinyClient::Configuration`
 
 
-```
+```ruby
 class MyConf < TinyClient::Configuration
 
   def initialize
@@ -34,7 +34,7 @@ end
 You can use that configuration in your resource. 
 
 
-```
+```ruby
 class Author < TinyClient::Resource
   conf MyConf.instance
   
@@ -54,7 +54,7 @@ end
 
 Now you will be able to do things like this: 
 
-```
+```ruby
 author = Author.show(1) # Get /authors/1.json
 author.name = 'P. K. D.'
 author.save!   # PUT /authors/1.json { "author" : { "name" : "Bob" } }
