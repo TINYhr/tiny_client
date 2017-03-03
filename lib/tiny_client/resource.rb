@@ -171,12 +171,10 @@ module TinyClient
       def nested_actions(nested)
         nested.each do |clazz|
           class_eval <<-RUBY
-            def #{clazz.low_name}s(params = {})
-              get_nested(#{clazz}, params)
-            end
-            def add_#{clazz.low_name}(resource)
-              create_nested(resource)
-            end
+            def #{clazz.low_name}s(params = {}); get_nested(#{clazz}, params) end
+            def #{clazz.low_name}s_each(params = {}); get_nested_each(#{clazz}, params) end
+            def #{clazz.low_name}s_in_batches(params = {}); get_nested_in_batches(#{clazz}, params) end
+            def add_#{clazz.low_name}(resource); create_nested(resource) end
           RUBY
         end
       end
