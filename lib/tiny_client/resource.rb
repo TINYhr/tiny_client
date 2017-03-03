@@ -8,8 +8,11 @@ module TinyClient
   # {file:README.md Getting Started}
   # @author @barjo
   class Resource
+    # A resource always have an id
+    attr_accessor :id
+
     class << self
-      include CurbRequestor
+      attr_reader :path, :fields, :nested
 
       # Set this resource client configuration
       # @param [Configuration] config the api url and client default headers.
@@ -25,18 +28,14 @@ module TinyClient
 
       # @param [*String] names the resource field names
       def fields(*names)
-        unless @fields.present?
-          attr_reader(*names)
-          @fields = names
-        end
-        @fields
+        @fields ||= field_accessor(names) && names
       end
 
       # Set nested resources. Nested resource creation and getters method will be created.
       # If the resource class is called Post, then {add_post} and {posts} methods will be created.
       # @param [Resource] clazz the nested resource class.
       def nested(*clazz)
-        @nested ||= clazz
+        @nested ||= nested_actions(clazz) && clazz
       end
 
       # GET /<path>.json
@@ -44,7 +43,45 @@ module TinyClient
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       # @return the list of resources available at this path.
       def index(params = {})
-        get(nil, nil, params, self)
+        get(params)
+      end
+
+      def index_each(params = {})
+        get_each(params)
+      end
+
+      def index_in_batches(params = {})
+        get_in_batches(params)
+      end
+
+      def get_each(params = {}, id = nil, name = nil, resource_class = nil)
+        Enumerator.new do |y|
+          limit = params.fetch(:limit, 100)
+          offset = params.fetch(:offset, 0)
+          count = limit
+
+          while limit == count
+            inner = get(params.merge(limit: limit, offset: offset), id, name, resource_class).each
+            loop { y << inner.next }
+            offset += limit
+            count = index.count
+          end
+        end
+      end
+
+      def get_in_batches(params = {}, id = nil, name = nil, resource_class = nil)
+        Enumerator.new do |y|
+          limit = params.fetch(:limit, 100)
+          offset = params.fetch(:offset, 0)
+          count = limit
+
+          while limit == count
+            inner = get(params.merge(limit: limit, offset: offset), id, name, resource_class)
+            loop { y << inner }
+            offset += limit
+            count = index.count
+          end
+        end
       end
 
       # POST /<resource_path>.json
@@ -54,7 +91,7 @@ module TinyClient
       # @return the created resource
       def create(content)
         data = { low_name => content.to_h }
-        post(nil, nil, data, self)
+        post(data)
       end
 
       # DELETE /<resource_path>/{id}
@@ -67,29 +104,27 @@ module TinyClient
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       # @return the resource available at that path
       def show(id, params = {})
-        get(id, nil, params, self)
+        get(params, id)
       end
 
       # GET /<path>/{id}/<name>
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-      def get(id, name, params, resource_class)
+      def get(params = {}, id = nil, name = nil, resource_class = nil)
         url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).query(params).build!
-        resp = perform_get(url, { 'Accept' => 'application/json',
-                                  'Content-Type' => 'application/x-www-form-urlencoded'
-                                }.merge!(@conf.headers))
-        raise ResponseError.new(resp) if resp.error?
-        resp.to_object(resource_class)
+        resp = CurbRequestor.perform_get(url, { 'Accept' => 'application/json',
+                                                'Content-Type' => 'application/x-www-form-urlencoded'
+                                              }.merge!(@conf.headers))
+        resp.to_object(resource_class || self)
       end
 
       # POST /<path>/{id}/<name>
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-      def post(id, name, data, resource_class)
+      def post(data, id = nil, name = nil, resource_class = nil)
         url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).build!
-        resp = perform_post(url, { 'Accept' => 'application/json',
-                                   'Content-Type' => 'application/json'
-                                }.merge!(@conf.headers), data.to_json)
-        raise ResponseError.new(resp) if resp.error?
-        resp.to_object(resource_class)
+        resp = CurbRequestor.perform_post(url, { 'Accept' => 'application/json',
+                                                 'Content-Type' => 'application/json'
+                                               }.merge!(@conf.headers), data.to_json)
+        resp.to_object(resource_class || self)
       end
 
       # Will query PUT /<path>/{id}
@@ -99,39 +134,56 @@ module TinyClient
       # @return the updated resource
       def update(id, content)
         data = { low_name => content.to_h }
-        put(id, nil, data, self)
+        put(data, id)
       end
 
       # PUT /<path>/{id}/<name>
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-      def put(id, name, data, resource_class)
+      def put(data, id = nil, name = nil, resource_class = nil)
         url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).build!
-        resp = perform_put(url, { 'Accept' => 'application/json',
-                                  'Content-Type' => 'application/json'
-                                }.merge!(@conf.headers), data.to_json)
-        raise ResponseError.new(resp) if resp.error?
-        resp.to_object(resource_class)
+        resp = CurbRequestor.perform_put(url, { 'Accept' => 'application/json',
+                                                'Content-Type' => 'application/json'
+                                              }.merge!(@conf.headers), data.to_json)
+        resp.to_object(resource_class || self)
       end
 
       def low_name
         @low_name ||= name.demodulize.downcase
       end
-    end
 
-    def initialize(*_args)
-      self.class.fields.each do |name|
-        send(:define_singleton_method, "#{name}=") do |value|
-          self.[]=(name, value)
-          @changes << name
+      private
+
+      def field_accessor(names)
+        names.each do |name|
+          class_eval <<-RUBY
+            def #{name}
+              @#{name}
+            end
+
+            def #{name}=(#{name})
+              @#{name}= #{name}
+              @changes << :#{name} # keep track of fields that has been modified
+            end
+            RUBY
         end
       end
 
-      self.class.nested.each do |clazz|
-        send(:define_singleton_method, "#{clazz.low_name}s") { |params = {}| get_nested(clazz, params) }
-        send(:define_singleton_method, "add_#{clazz.low_name}") { |resource| create_nested(resource) }
+      def nested_actions(nested)
+        nested.each do |clazz|
+          class_eval <<-RUBY
+            def #{clazz.low_name}s(params = {})
+              get_nested(#{clazz}, params)
+            end
+            def add_#{clazz.low_name}(resource)
+              create_nested(resource)
+            end
+          RUBY
+        end
       end
+    end
 
-      @changes = Set.new
+    def initialize(*_args)
+      @changes = Set.new # store the fields change here
     end
 
     # Save the resource fields that has changed, or create it, if it's a new one!
@@ -167,14 +219,24 @@ module TinyClient
 
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
     def get_nested(resource_class, params = {})
-      self.class.get(@id, resource_class.path, params, resource_class)
+      self.class.get(params, @id, resource_class.path, resource_class)
+    end
+
+    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+    def get_nested_each(resource_class, params = {})
+      self.class.get_each(params, @id, resource_class.path, resource_class)
+    end
+
+    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+    def get_nested_in_batches(resource_class, params = {})
+      self.class.get_in_batches(params, @id, resource_class.path, resource_class)
     end
 
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
     def create_nested(resource)
       raise ArgumentError, 'resource must be an instance of TinyClient::Resource' unless resource.is_a? Resource
       data = { resource.class.low_name => resource.to_h }
-      self.class.post(@id, resource.class.path, data, resource.class)
+      self.class.post(data, @id, resource.class.path, resource.class)
     end
 
     # @return [Hash] an hash representation of this resource fields.
