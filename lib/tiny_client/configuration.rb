@@ -6,9 +6,9 @@ module TinyClient
   # @attr_reader [Hash] headers default headers you want to pass along every request
   class Configuration
     include Singleton
-    attr_reader :url, :headers
+    attr_reader :url, :headers, :limit
 
-    # You need to initialize the api {#url} and default {#headers}.
+    # You need to initialize the api {#url}, default {#headers}, and default limit.
     def initialize; raise NotImplementedError end
   end
 end

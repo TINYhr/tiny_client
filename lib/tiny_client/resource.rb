@@ -56,10 +56,8 @@ module TinyClient
 
       def get_each(params = {}, id = nil, name = nil, resource_class = nil)
         Enumerator.new do |y|
-          limit = params.fetch(:limit, 100)
+          count = limit = params.fetch(:limit, @conf.limit || 100)
           offset = params.fetch(:offset, 0)
-          count = limit
-
           while limit == count
             inner = get(params.merge(limit: limit, offset: offset), id, name, resource_class).each
             loop { y << inner.next }
@@ -71,9 +69,8 @@ module TinyClient
 
       def get_in_batches(params = {}, id = nil, name = nil, resource_class = nil)
         Enumerator.new do |y|
-          limit = params.fetch(:limit, 100)
+          count = limit = params.fetch(:limit, @conf.limit || 100)
           offset = params.fetch(:offset, 0)
-          count = limit
 
           while limit == count
             inner = get(params.merge(limit: limit, offset: offset), id, name, resource_class)
@@ -119,7 +116,9 @@ module TinyClient
 
       # POST /<path>/{id}/<name>
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+      # @raise [ArgumentError] if data cannot be serialized as a json string ( .to_json )
       def post(data, id = nil, name = nil, resource_class = nil)
+        verify_json(data)
         url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).build!
         resp = CurbRequestor.perform_post(url, { 'Accept' => 'application/json',
                                                  'Content-Type' => 'application/json'
@@ -139,7 +138,9 @@ module TinyClient
 
       # PUT /<path>/{id}/<name>
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+      # @raise [ArgumentError] if data cannot be serialized as a json string ( .to_json )
       def put(data, id = nil, name = nil, resource_class = nil)
+        verify_json(data)
         url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).build!
         resp = CurbRequestor.perform_put(url, { 'Accept' => 'application/json',
                                                 'Content-Type' => 'application/json'
@@ -153,12 +154,14 @@ module TinyClient
 
       private
 
+      def verify_json(data)
+        raise ArgumentError, 'data must respond to .to_json' unless data.respond_to? :to_json
+      end
+
       def field_accessor(names)
         names.each do |name|
           class_eval <<-RUBY
-            def #{name}
-              @#{name}
-            end
+            def #{name}; @#{name} end
 
             def #{name}=(#{name})
               @#{name}= #{name}
