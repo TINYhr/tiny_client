@@ -76,6 +76,18 @@ ed_books = ed.books(limit: 10) # GET /authors/{ed.id}/books.json
 first = ed_books.first
 first.load! # GET /books/{first.id}.json
 first.name.present?
+
+# You can also use enumerators on the nested resource
+
+ed.books_each do |book| # It will retrieve all the books, using limit, and offset query params to query the server in batch
+ # Do something for each books
+end
+
+
+ed.books_in_batches(limit: 1000) do |books|
+  # retrieve books by batch of 1000
+end
+
 ```
 
 
