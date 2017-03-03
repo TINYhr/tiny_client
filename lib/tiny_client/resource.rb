@@ -64,7 +64,7 @@ module TinyClient
             inner = get(params.merge(limit: limit, offset: offset), id, name, resource_class).each
             loop { y << inner.next }
             offset += limit
-            count = index.count
+            count = inner.count
           end
         end
       end
@@ -79,7 +79,7 @@ module TinyClient
             inner = get(params.merge(limit: limit, offset: offset), id, name, resource_class)
             loop { y << inner }
             offset += limit
-            count = index.count
+            count = inner.count
           end
         end
       end
