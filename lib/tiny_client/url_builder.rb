@@ -21,7 +21,7 @@ module TinyClient
 
     def build!
       query_s = "?#{@query.to_query}" unless @query.empty?
-      "#{@path.join(SEPARATOR)}#{query_s}.json"
+      "#{@path.join(SEPARATOR)}.json#{query_s}"
     end
 
     private
