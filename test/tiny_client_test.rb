@@ -74,16 +74,23 @@ describe TinyClient do
     end
 
     describe '#destroy!' do
-      let(:response) { post.destroy! }
+      let(:destroy!) { post.destroy! }
 
-      before do
-        post.id = 1
-        stub_request(:delete, Dummy::Config.instance.url + '/posts/1.json').to_return(status: 204)
-        response
+      before { stub_request(:delete, Dummy::Config.instance.url + '/posts/1.json').to_return(status: 204) }
+
+      describe 'when the post have an id' do
+        before { post.id = 1 }
+        it { destroy!.must_equal post }
+        it 'call delete on the post resource' do
+          destroy!
+          assert_requested :delete, Dummy::Config.instance.url + '/posts/1.json'
+        end
       end
+      describe 'when the post does not have an id' do
+        before { post.id = nil }
 
-      it { assert_requested :delete, Dummy::Config.instance.url + '/posts/1.json' }
-      it { response.must_equal post }
+        it { proc { destroy! }.must_raise TinyClient::ResourceError }
+      end
     end
 
     describe '#self.create' do
