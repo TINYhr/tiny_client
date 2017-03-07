@@ -1,4 +1,4 @@
-require 'json'
+require 'json/ext'
 
 module TinyClient
   #
@@ -16,8 +16,8 @@ module TinyClient
     end
 
     # Convert the response json body into an object.
-    def to_object(object_class = OpenStruct)
-      JSON.parse(body_str, object_class: object_class)
+    def parse_body(object_class = OpenStruct)
+      JSON.parse(body_str, object_class: object_class) unless code == 204
     end
 
     def success?

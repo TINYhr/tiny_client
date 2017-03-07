@@ -111,7 +111,7 @@ module TinyClient
         resp = CurbRequestor.perform_get(url, { 'Accept' => 'application/json',
                                                 'Content-Type' => 'application/x-www-form-urlencoded'
                                               }.merge!(@conf.headers))
-        resp.to_object(resource_class || self)
+        resp.parse_body(resource_class || self)
       end
 
       # POST /<path>/{id}/<name>
@@ -123,7 +123,7 @@ module TinyClient
         resp = CurbRequestor.perform_post(url, { 'Accept' => 'application/json',
                                                  'Content-Type' => 'application/json'
                                                }.merge!(@conf.headers), data.to_json)
-        resp.to_object(resource_class || self)
+        resp.parse_body(resource_class || self)
       end
 
       # Will query PUT /<path>/{id}
@@ -145,7 +145,29 @@ module TinyClient
         resp = CurbRequestor.perform_put(url, { 'Accept' => 'application/json',
                                                 'Content-Type' => 'application/json'
                                               }.merge!(@conf.headers), data.to_json)
-        resp.to_object(resource_class || self)
+        resp.parse_body(resource_class || self)
+      end
+
+      # PUT /<path>/{id}/<name>
+      # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+      # @raise [ArgumentError] if data cannot be serialized as a json string ( .to_json )
+      def put(data, id = nil, name = nil, resource_class = nil)
+        verify_json(data)
+        url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).build!
+        resp = CurbRequestor.perform_put(url, { 'Accept' => 'application/json',
+                                                'Content-Type' => 'application/json'
+                                              }.merge!(@conf.headers), data.to_json)
+        resp.parse_body(resource_class || self)
+      end
+
+      # delete /<path>/{id}.json
+      # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+      def delete(id = nil, name = nil, resource_class = nil)
+        url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).build!
+        resp = CurbRequestor.perform_delete(url, { 'Accept' => 'application/json',
+                                                   'Content-Type' => 'application/x-www-form-urlencoded'
+                                              }.merge!(@conf.headers))
+        resp.parse_body(resource_class || self)
       end
 
       def low_name
@@ -201,6 +223,17 @@ module TinyClient
               end
       clone_fields(saved)
       @changes.clear
+      self
+    end
+
+    # Destroy this resource. It will call delete on this resource id.
+    # DELETE /path/id
+    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+    # @raise ResourceError if this resource does not have an id.
+    # @return the deleted resource
+    def destroy!
+      raise ResourceError, 'Cannot delete resource if @id not present' if id.blank?
+      self.class.delete(id)
       self
     end
 

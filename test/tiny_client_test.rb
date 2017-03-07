@@ -73,6 +73,19 @@ describe TinyClient do
       end
     end
 
+    describe '#destroy!' do
+      let(:response) { post.destroy! }
+
+      before do
+        post.id = 1
+        stub_request(:delete, Dummy::Config.instance.url + '/posts/1.json').to_return(status: 204)
+        response
+      end
+
+      it { assert_requested :delete, Dummy::Config.instance.url + '/posts/1.json' }
+      it { response.must_equal post }
+    end
+
     describe '#self.create' do
       let(:body) { { post: { id: 1, name: 'tata', content: 'blabla' } } }
       let(:response) { Dummy::Post.create(body[:post]) }
