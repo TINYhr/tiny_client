@@ -6,6 +6,10 @@ module Dummy
     conf Config.instance
     nested Post
     path 'authors'
-    fields :id, :name
+    fields :id, :name, :info
+
+    def birthday
+      Date.parse info['birthday']
+    end
   end
 end

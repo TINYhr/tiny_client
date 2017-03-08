@@ -41,6 +41,20 @@ describe TinyClient do
                          body: { post: post.to_h }.to_json
       end
     end
+
+    describe '#self.show(1)' do
+      let(:author1) { { name: 'P.K.D', info:  { birthday: '1928-12-16', gender: 'male' } } }
+
+      let(:resource) { Dummy::Author.show(1) }
+
+      before do
+        stub_request(:get, Dummy::Config.instance.url + '/authors/1.json').to_return(body: author1.to_json)
+      end
+
+      it { resource.birthday.must_equal Date.parse('1928-12-16') }
+      it { resource.name.must_equal author1[:name] }
+      it { resource.info.must_equal author1[:info].stringify_keys }
+    end
   end
 
   describe 'Dummy Post' do
@@ -97,7 +111,7 @@ describe TinyClient do
       let(:body) { { post: { id: 1, name: 'tata', content: 'blabla' } } }
       let(:response) { Dummy::Post.create(body[:post]) }
       before do
-        stub_request(:post, Dummy::Config.instance.url + '/posts.json').to_return(body: '{}')
+        stub_request(:post, Dummy::Config.instance.url + '/posts.json').to_return(body: {}.to_json)
         response
       end
 

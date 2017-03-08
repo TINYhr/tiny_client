@@ -18,7 +18,7 @@ module TinyClient
     # Convert the response json body into an object.
     def parse_body(object_class = OpenStruct)
       params = { object_class: object_class } if object_class.present?
-      JSON.parse(body_str, params) unless code == 204
+      JSON.parse(body_str, params) if body_str.present?
     end
 
     def success?

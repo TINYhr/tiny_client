@@ -8,11 +8,13 @@ module TinyClient
   # {file:README.md Getting Started}
   # @author @barjo
   class Resource
+    include Nested
+
     # A resource always have an id
     attr_accessor :id
 
     class << self
-      attr_reader :path, :fields, :nested
+      attr_reader :path, :fields
 
       # Set this resource client configuration
       # @param [Configuration] config the api url and client default headers.
@@ -31,35 +33,32 @@ module TinyClient
         @fields ||= field_accessor(names) && names
       end
 
-      # Set nested resources. Nested resource creation and getters method will be created.
-      # If the resource class is called Post, then {add_post} and {posts} methods will be created.
-      # @param [Resource] clazz the nested resource class.
-      def nested(*clazz)
-        @nested ||= nested_actions(clazz) && clazz
-      end
-
       # GET /<path>.json
       # @param [Hash] optional query parameters
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-      # @return the list of resources available at this path.
+      # @return [Enumerator] enumerate the resources available at this path.
       def index(params = {})
         get(params)
       end
 
-      def index_each(params = {})
-        get_each(params)
+      # Similar to {#index} but return all resources available at this path. It use limit and offset
+      # params to retrieved all resources. ( buffered by the limit size)
+      def index_all(params = {})
+        get_all(params)
       end
 
+      # Similar to {#index_all}, the return enumerator will yield on the buffered ( limit )
+      # rather than each element.
       def index_in_batches(params = {})
         get_in_batches(params)
       end
 
-      def get_each(params = {}, id = nil, name = nil, resource_class = nil)
+      def get_all(params = {}, id = nil, name = nil, resource_class = nil)
         Enumerator.new do |y|
           count = limit = params.fetch(:limit, @conf.limit || 100)
           offset = params.fetch(:offset, 0)
           while limit == count
-            inner = get(params.merge(limit: limit, offset: offset), id, name, resource_class).each
+            inner = get(params.merge(limit: limit, offset: offset), id, name, resource_class)
             loop { y << inner.next }
             offset += limit
             count = inner.count
@@ -71,7 +70,6 @@ module TinyClient
         Enumerator.new do |y|
           count = limit = params.fetch(:limit, @conf.limit || 100)
           offset = params.fetch(:offset, 0)
-
           while limit == count
             inner = get(params.merge(limit: limit, offset: offset), id, name, resource_class)
             loop { y << inner }
@@ -91,11 +89,6 @@ module TinyClient
         post(data)
       end
 
-      # DELETE /<resource_path>/{id}
-      def delete(_id)
-        raise NotImplementedError
-      end
-
       # GET /<resource_path>/{id}
       # @param [String, Integer] id the resource id
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
@@ -111,7 +104,7 @@ module TinyClient
         resp = CurbRequestor.perform_get(url, { 'Accept' => 'application/json',
                                                 'Content-Type' => 'application/x-www-form-urlencoded'
                                               }.merge!(@conf.headers))
-        resp.parse_body(resource_class || self)
+        (resource_class || self).from_response resp
       end
 
       # POST /<path>/{id}/<name>
@@ -123,7 +116,7 @@ module TinyClient
         resp = CurbRequestor.perform_post(url, { 'Accept' => 'application/json',
                                                  'Content-Type' => 'application/json'
                                                }.merge!(@conf.headers), data.to_json)
-        resp.parse_body(resource_class || self)
+        (resource_class || self).from_response resp
       end
 
       # Will query PUT /<path>/{id}
@@ -145,19 +138,7 @@ module TinyClient
         resp = CurbRequestor.perform_put(url, { 'Accept' => 'application/json',
                                                 'Content-Type' => 'application/json'
                                               }.merge!(@conf.headers), data.to_json)
-        resp.parse_body(resource_class || self)
-      end
-
-      # PUT /<path>/{id}/<name>
-      # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-      # @raise [ArgumentError] if data cannot be serialized as a json string ( .to_json )
-      def put(data, id = nil, name = nil, resource_class = nil)
-        verify_json(data)
-        url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).build!
-        resp = CurbRequestor.perform_put(url, { 'Accept' => 'application/json',
-                                                'Content-Type' => 'application/json'
-                                              }.merge!(@conf.headers), data.to_json)
-        resp.parse_body(resource_class || self)
+        (resource_class || self).from_response resp
       end
 
       # delete /<path>/{id}.json
@@ -167,11 +148,25 @@ module TinyClient
         resp = CurbRequestor.perform_delete(url, { 'Accept' => 'application/json',
                                                    'Content-Type' => 'application/x-www-form-urlencoded'
                                               }.merge!(@conf.headers))
-        resp.parse_body(resource_class || self)
+        (resource_class || self).from_response resp
       end
 
       def low_name
         @low_name ||= name.demodulize.downcase
+      end
+
+      def from_response(response)
+        body = response.parse_body(nil)
+        return from_hash(body) if body.is_a? Hash
+        return Enumerator.new(body.size) do |yielder|
+          inner = body.each
+          loop { yielder << from_hash(inner.next) }
+        end if body.is_a? Array
+        body
+      end
+
+      def from_hash(h)
+        fields.each_with_object(new) { |f, r| r.send("#{f}=", h[f.to_s]) }
       end
 
       private
@@ -190,17 +185,6 @@ module TinyClient
               @changes << :#{name} # keep track of fields that has been modified
             end
             RUBY
-        end
-      end
-
-      def nested_actions(nested)
-        nested.each do |clazz|
-          class_eval <<-RUBY
-            def #{clazz.low_name}s(params = {}); get_nested(#{clazz}, params) end
-            def #{clazz.low_name}s_each(params = {}); get_nested_each(#{clazz}, params) end
-            def #{clazz.low_name}s_in_batches(params = {}); get_nested_in_batches(#{clazz}, params) end
-            def add_#{clazz.low_name}(resource); create_nested(resource) end
-          RUBY
         end
       end
     end
@@ -251,32 +235,10 @@ module TinyClient
       reloaded
     end
 
-    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-    def get_nested(resource_class, params = {})
-      self.class.get(params, @id, resource_class.path, resource_class)
-    end
-
-    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-    def get_nested_each(resource_class, params = {})
-      self.class.get_each(params, @id, resource_class.path, resource_class)
-    end
-
-    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-    def get_nested_in_batches(resource_class, params = {})
-      self.class.get_in_batches(params, @id, resource_class.path, resource_class)
-    end
-
-    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-    def create_nested(resource)
-      raise ArgumentError, 'resource must be an instance of TinyClient::Resource' unless resource.is_a? Resource
-      data = { resource.class.low_name => resource.to_h }
-      self.class.post(data, @id, resource.class.path, resource.class)
-    end
-
     # @return [Hash] an hash representation of this resource fields.
     def to_h
       self.class.fields.each_with_object({}) do |name, h|
-        value = instance_variable_get("@#{name}")
+        value = send(name)
         h[name] = value if value.present?
       end
     end
@@ -290,23 +252,14 @@ module TinyClient
       end
     end
 
-    protected
-
-    # call by JSON
-    def []=(name, value)
-      instance_variable_set("@#{name}", value)
-    end
-
     private
 
     def clone_fields(resource)
-      resource.to_h.each { |k, v| self.[]=(k, v) }
+      self.class.fields.each { |f| send("#{f}=", resource.send(f)) }
     end
 
     def changed_attributes
-      @changes.each_with_object({}) do |k, h|
-        h[k] = instance_variable_get("@#{k}")
-      end
+      @changes.each_with_object({}) { |k, h| h[k] = send(k) }
     end
   end
 end
