@@ -52,7 +52,7 @@ class Book < TinyClient::Resource
 end
 ```
 
-Now you will be able to do things like this: 
+Now you will be able to this: 
 
 ```ruby
 author = Author.show(1) # Get /authors/1.json
@@ -77,9 +77,9 @@ first = ed_books.first
 first.load! # GET /books/{first.id}.json
 first.name.present?
 
-# You can also use enumerators on the nested resource
+# You can also navigate through all resources 
 
-ed.books_each do |book| # It will retrieve all the books, using limit, and offset query params to query the server in batch
+ed.books_all do |book| # It will retrieve all the books, using limit, and offset query params to query the server in batch
  # Do something for each books
 end
 
