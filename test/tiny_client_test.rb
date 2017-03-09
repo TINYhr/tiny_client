@@ -149,8 +149,6 @@ describe TinyClient do
         end
       end
 
-      require 'active_support/gzip'
-
       describe '#self.show(1) with gzip content' do
         before { stub_request(:get, Dummy::Config.instance.url + '/posts/1.json').to_return(body: ActiveSupport::Gzip.compress(posts[0].to_json), headers: {'Content-Encoding' => 'gzip'}) }
 
