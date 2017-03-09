@@ -155,18 +155,30 @@ module TinyClient
         @low_name ||= name.demodulize.downcase
       end
 
+      # Create a resouce instance from an Hash.
+      # @param [Hash] h the resource fields with their values
+      # @param [Boolean] track_changes if true all fields will be marked has changed
+      # @return [Resource] the newly created resource
+      def from_hash(h, track_changes = true)
+        resource = fields.each_with_object(new) { |f, r| r.send("#{f}=", h[f.to_s]) }
+        resource.clear_changes! unless track_changes
+        resource
+      end
+
+      protected
+
+      # Create a resource instance from a {Response}.
+      # If the response contains an Array of resource hash, an Enumerator will be return.
+      # @param [Response] response obtained from making a request.
+      # @return [Resource, Enumerator, nil] the resources created from the given response.
       def from_response(response)
         body = response.parse_body(nil)
-        return from_hash(body) if body.is_a? Hash
+        return from_hash(body, false) if body.is_a? Hash
         return Enumerator.new(body.size) do |yielder|
           inner = body.each
           loop { yielder << from_hash(inner.next) }
         end if body.is_a? Array
         body
-      end
-
-      def from_hash(h)
-        fields.each_with_object(new) { |f, r| r.send("#{f}=", h[f.to_s]) }
       end
 
       private
@@ -206,7 +218,7 @@ module TinyClient
                 self.class.create(changed_attributes)
               end
       clone_fields(saved)
-      @changes.clear
+      clear_changes!
       self
     end
 
@@ -231,8 +243,14 @@ module TinyClient
       # get the values from the persistence layer
       reloaded = self.class.show(@id, params)
       clone_fields(reloaded)
-      @changes.clear
+      clear_changes!
       reloaded
+    end
+
+    # Mark all fields has not changed. This mean that calling save! will not modify this resource
+    # until a field attribute has been changed.
+    def clear_changes!
+      @changes.clear
     end
 
     # @return [Hash] an hash representation of this resource fields.
