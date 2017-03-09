@@ -252,6 +252,17 @@ module TinyClient
       end
     end
 
+    # @param [Hash] options for the json serialization
+    # @option [Boolean] prefixed true if you want the resource to be prefixed by it's low_name
+    # @return [String] a json representation of this resource
+    def as_json(options = { prefixed: true })
+      if options[:prefixed]
+        { self.class.low_name => to_h }.to_json
+      else
+        to_h.to_json
+      end
+    end
+
     private
 
     def clone_fields(resource)
