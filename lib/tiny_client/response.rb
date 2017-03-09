@@ -1,4 +1,5 @@
 require 'json/ext'
+require 'active_support/gzip'
 
 module TinyClient
   #
@@ -18,7 +19,16 @@ module TinyClient
     # Convert the response json body into an object.
     def parse_body(object_class = OpenStruct)
       params = { object_class: object_class } if object_class.present?
-      JSON.parse(body_str, params) if body_str.present?
+      body = gzip? ? gzip_decompress : body_str
+      JSON.parse(body, params) if body.present?
+    end
+
+    def gzip?
+      /Content-Encoding: gzip/ =~ header_str
+    end
+
+    def gzip_decompress
+      ActiveSupport::Gzip.decompress(body_str)
     end
 
     def success?

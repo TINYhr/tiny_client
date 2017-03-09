@@ -148,6 +148,23 @@ describe TinyClient do
                                       'Content-Type' => 'application/x-www-form-urlencoded' }
         end
       end
+
+      require 'active_support/gzip'
+
+      describe '#self.show(1) with gzip content' do
+        before { stub_request(:get, Dummy::Config.instance.url + '/posts/1.json').to_return(body: ActiveSupport::Gzip.compress(posts[0].to_json), headers: {'Content-Encoding' => 'gzip'}) }
+
+        subject { Dummy::Post.show(1) }
+
+        it { subject.must_be_instance_of Dummy::Post }
+        it { subject.to_h.must_equal posts[0] }
+        it 'request with proper headers' do
+          subject
+          assert_requested :get, Dummy::Config.instance.url + '/posts/1.json',
+                           headers: { 'Accept' => 'application/json',
+                                      'Content-Type' => 'application/x-www-form-urlencoded' }
+        end
+      end
     end
   end
 end
