@@ -1,9 +1,8 @@
 # TINYclient, a tiny HTTP/JSON crud client toolkit
 
+TINYclient is inspired by [Active Record](http://guides.rubyonrails.org/active_record_basics.html) and based on [Curb](https://github.com/taf2/curb).
 
 ### Setup
-
-TINYclient is based on [Curb](https://github.com/taf2/curb).
 
 * Be sure that Curb/Curl works properly on your machine.
 * install the gem
@@ -153,7 +152,7 @@ Author.index_all({limit: 100}) # Will queries the server by batch of 100, until 
 
 #### Content-Encoding support
 
-TinyClient support `gzip` Content-Encoding. Response with `gzip` Content-Type will be automatically decompressed.
+TinyClient support `gzip` Content-Encoding. Response with `gzip` Content-Encoding will be automatically decompressed.
 You can set the `Accept-Encoding: gzip` through the configuration headers.
  
 
