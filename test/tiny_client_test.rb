@@ -21,7 +21,7 @@ describe TinyClient do
 
       it { response.count.must_equal 1 }
       it { response.first.must_be_instance_of Dummy::Post }
-      it { response.first.to_h.must_equal posts[0] }
+      it { response.first.as_json.must_equal posts[0] }
     end
 
     describe '#add_post' do
@@ -29,7 +29,7 @@ describe TinyClient do
       let(:response) { author.add_post(post) }
       before do
         author.id = 1
-        stub_request(:post, Dummy::Config.instance.url + '/authors/1/posts.json').to_return(body: post.to_json(false))
+        stub_request(:post, Dummy::Config.instance.url + '/authors/1/posts.json').to_return(body: post.to_json)
         response
       end
 
@@ -38,7 +38,7 @@ describe TinyClient do
       it { response.content.must_equal post.content }
       it 'create a new post for this author' do
         assert_requested :post, "#{Dummy::Config.instance.url}/authors/1/posts.json",
-                         body: { post: post.to_h }.to_json
+                         body: { post: post }.to_json
       end
     end
 
@@ -74,15 +74,16 @@ describe TinyClient do
           post.name = 'toto'
           post.content = 'tata'
           stub_request(:post, Dummy::Config.instance.url + '/posts.json')
-            .to_return(body: post.to_json(false))
+            .to_return(body: { post: post }.to_json)
           response
         end
         it { response.must_be_instance_of Dummy::Post }
         it { response.name.must_equal post.name }
         it { response.content.must_equal post.content }
+        it { response.changes.must_respond_to(:empty?) }
         it 'make a post request on the resource path with json content' do
           assert_requested :post, Dummy::Config.instance.url + '/posts.json',
-                           body: { post: post.to_h }.to_json, headers: { 'Content-Type' => 'application/json' }
+                           body: { post: { name: 'toto', content: 'tata' } }.to_json, headers: { 'Content-Type' => 'application/json' }
         end
       end
     end
@@ -131,7 +132,7 @@ describe TinyClient do
 
         it { subject.count.must_equal 3 }
         it { subject.first.must_be_instance_of Dummy::Post }
-        it { subject.first.to_h.must_equal posts[0] }
+        it { subject.first.as_json.must_equal posts[0] }
       end
 
       describe '#self.show(1)' do
@@ -140,7 +141,7 @@ describe TinyClient do
         subject { Dummy::Post.show(1) }
 
         it { subject.must_be_instance_of Dummy::Post }
-        it { subject.to_h.must_equal posts[0] }
+        it { subject.as_json.must_equal posts[0] }
         it 'request with proper headers' do
           subject
           assert_requested :get, Dummy::Config.instance.url + '/posts/1.json',
@@ -155,7 +156,7 @@ describe TinyClient do
         subject { Dummy::Post.show(1) }
 
         it { subject.must_be_instance_of Dummy::Post }
-        it { subject.to_h.must_equal posts[0] }
+        it { subject.as_json.must_equal posts[0] }
         it 'request with proper headers' do
           subject
           assert_requested :get, Dummy::Config.instance.url + '/posts/1.json',

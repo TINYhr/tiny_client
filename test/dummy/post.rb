@@ -9,9 +9,9 @@ module Dummy
     fields :id, :name, :content
 
     def initialize(name = nil, content = nil)
-      @name = name
-      @content = content
       super
+      self.name = name
+      self.content = content
     end
   end
 end

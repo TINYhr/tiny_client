@@ -31,7 +31,7 @@ module TinyClient
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
     def create_nested(resource)
       raise ArgumentError, 'resource must be an TinyClient::Resource' unless resource.is_a? Resource
-      data = { resource.class.low_name => resource.to_h }
+      data = { resource.class.low_name => resource.as_json(only: resource.changes.to_a) }
       self.class.post(data, @id, resource.class.path, resource.class)
     end
 

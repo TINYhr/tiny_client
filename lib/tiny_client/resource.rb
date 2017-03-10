@@ -85,7 +85,7 @@ module TinyClient
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       # @return the created resource
       def create(content)
-        data = { low_name => content.to_h }
+        data = { low_name => content }
         post(data)
       end
 
@@ -125,7 +125,7 @@ module TinyClient
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       # @return the updated resource
       def update(id, content)
-        data = { low_name => content.to_h }
+        data = { low_name => content }
         put(data, id)
       end
 
@@ -159,8 +159,8 @@ module TinyClient
       # @param [Hash] h the resource fields with their values
       # @param [Boolean] track_changes if true all fields will be marked has changed
       # @return [Resource] the newly created resource
-      def from_hash(h, track_changes = true)
-        resource = fields.each_with_object(new) { |f, r| r.send("#{f}=", h[f.to_s]) }
+      def from_hash(hash, track_changes = true)
+        resource = fields.each_with_object(new) { |field, r| r.send("#{field}=", hash[field.to_s]) }
         resource.clear_changes! unless track_changes
         resource
       end
@@ -201,6 +201,9 @@ module TinyClient
       end
     end
 
+    # the fields that has beem modified, and will be save on {save!}
+    attr_reader :changes
+
     def initialize(*_args)
       @changes = Set.new # store the fields change here
     end
@@ -213,9 +216,9 @@ module TinyClient
     # @return [Resource] the updated resource
     def save!
       saved = if id.present?
-                self.class.update(id, changed_attributes)
+                self.class.update(id, as_json(only: @changes.to_a))
               else
-                self.class.create(changed_attributes)
+                self.class.create(as_json(only: @changes.to_a))
               end
       clone_fields(saved)
       clear_changes!
@@ -253,42 +256,29 @@ module TinyClient
       @changes.clear
     end
 
-    # @return [Hash] an hash representation of this resource fields.
-    def to_h
-      self.class.fields.each_with_object({}) do |name, h|
-        value = send(name)
-        h[name] = value if value.present?
+    # @param [Hash] see {#as_json}
+    # @return [String] a json representation of this resource
+    def to_json(options = {})
+      as_json(options).to_json
+    end
+
+    # @param [Hash] options for the hash transformation
+    # @option [Array] only limit the hash content to those fields
+    # @return [Hash] a json ready representation of this resource
+    def as_json(options = {})
+      fields = self.class.fields & (options[:only] || self.class.fields)
+      fields.each_with_object({}) do |field, h|
+        value = send(field)
+        h[field] = value if value
       end
     end
 
-    # @return [String] a json representation of this resource
-    def to_json(prefixed = true)
-      if prefixed
-        { self.class.low_name => to_h }.to_json
-      else
-        to_h.to_json
-      end
-    end
-
-    # @param [Hash] options for the json serialization
-    # @option [Boolean] prefixed true if you want the resource to be prefixed by it's low_name
-    # @return [String] a json representation of this resource
-    def as_json(options = { prefixed: true })
-      if options[:prefixed]
-        { self.class.low_name => to_h }.to_json
-      else
-        to_h.to_json
-      end
-    end
+    alias to_h as_json
 
     private
 
     def clone_fields(resource)
       self.class.fields.each { |f| send("#{f}=", resource.send(f)) }
-    end
-
-    def changed_attributes
-      @changes.each_with_object({}) { |k, h| h[k] = send(k) }
     end
   end
 end
