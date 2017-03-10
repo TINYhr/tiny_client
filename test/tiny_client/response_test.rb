@@ -6,7 +6,7 @@ describe TinyClient::Response do
 
   before do
     curb.responds_like_instance_of(Curl::Easy)
-    curb.stubs(body_str: body.to_json, status: status, header_str: '', url: 'toto' )
+    curb.stubs(body_str: body.to_json, status: status, header_str: '', url: 'toto')
   end
 
   describe 'when curb contains a successful (200) json response' do
