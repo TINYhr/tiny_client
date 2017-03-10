@@ -40,7 +40,7 @@ module TinyClient
       attr_reader :nested
 
       # Set nested resources. Nested resource creation and getters method will be created.
-      # If the resource class is called Post, then {add_post} and {posts} methods will be created.
+      # If the resource class is called Post, then `add_post` and `posts` methods will be created.
       # @param [Resource] clazz the nested resource class.
       def nested(*clazz)
         @nested ||= nested_actions(clazz) && clazz

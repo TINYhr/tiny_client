@@ -90,5 +90,68 @@ end
 
 ```
 
+### Instance methods behavior
 
+#### load! 
+
+It will perform a get request on the resource id and set the resource fields value to the value retrived by the response.
+
+```
+author.load! # GET /authors/{author.id}.json ->  { id: 1, name: 'Toto' ... }
+author.name # 'Toto'
+```
+
+#### save!
+
+It will create the resource if `id` is not set, otherwise it will update it.
+The resource fields value will be updated by the response body content.
+
+```
+toto = MyModule::Author.new
+toto.save! # POST /authors.json { author: {} }
+
+toto.id # should have been set by through the reponse
+
+toto.name = 'Toto'
+toto.save! # PUT {author: {name: 'Toto'}} -> /authors/{toto.id}.json
+```
+
+Only `changed` values will be passed through the body content.
+
+You can `clear` changes with `#clear_changes!`
+You can now which fields has been marked has changed with `#changes`
+
+Changes is automatically clear when you perform a request ( i.e call, `#show #index #get #put #post save!` and so on)
+
+### Constraint
+
+#### JSON only
+
+TinyClient supports only JSON data. 
+`Accept: application/json` header is set.
+
+#### POST/PUT create/update
+
+The content passed to the server will always be prefixed by the class name in lower case.
+
+```
+toto = MyModule::Author.new
+toto.save! # POST { author: {} }
+
+```
+
+#### Pagination / Buffer
+
+Pagination, buffer is achieve through `limit` and `offset` params.
+
+```
+Author.index_all({limit: 100}) # Will queries the server by batch of 100, until all authors has been retrieved through the enumerator.
+
+```
+
+#### Content-Encoding support
+
+TinyClient support `gzip` Content-Encoding. Response with `gzip` Content-Type will be automatically decompressed.
+You can set the `Accept-Encoding: gzip` through the configuration headers.
+ 
 

@@ -1,7 +1,6 @@
 require 'set'
 
 module TinyClient
-  # @markup markdown
   # This is the core of TinyClient.
   # Subclass {TinyClient::Resource} in order to create an HTTP/JSON tiny client.
   #
@@ -23,7 +22,7 @@ module TinyClient
       end
 
       # Set the resource path, default is the class name in lower case.
-      # @param [String] the resource path
+      # @param [String] path the resource path
       def path(path = nil)
         @path ||= path || low_name
       end
@@ -34,20 +33,20 @@ module TinyClient
       end
 
       # GET /<path>.json
-      # @param [Hash] optional query parameters
+      # @param [Hash] params query parameters
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       # @return [Enumerator] enumerate the resources available at this path.
       def index(params = {})
         get(params)
       end
 
-      # Similar to {#index} but return all resources available at this path. It use limit and offset
+      # Similar to {index} but return all resources available at this path. It use limit and offset
       # params to retrieved all resources. ( buffered by the limit size)
       def index_all(params = {})
         get_all(params)
       end
 
-      # Similar to {#index_all}, the return enumerator will yield on the buffered ( limit )
+      # Similar to {index_all}, the return enumerator will yield on the buffered ( limit )
       # rather than each element.
       def index_in_batches(params = {})
         get_in_batches(params)
@@ -121,7 +120,7 @@ module TinyClient
 
       # Will query PUT /<path>/{id}
       # @param [String, Integer] id the id of the resource that needs to be updated
-      # @param [Object] the updated attributes/fields/resource
+      # @param [Object] content the updated attributes/fields/resource
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       # @return the updated resource
       def update(id, content)
@@ -156,7 +155,7 @@ module TinyClient
       end
 
       # Create a resouce instance from an Hash.
-      # @param [Hash] h the resource fields with their values
+      # @param [Hash] hash the resource fields with their values
       # @param [Boolean] track_changes if true all fields will be marked has changed
       # @return [Resource] the newly created resource
       def from_hash(hash, track_changes = true)
@@ -256,7 +255,7 @@ module TinyClient
       @changes.clear
     end
 
-    # @param [Hash] see {#as_json}
+    # @param [Hash] options see {as_json}
     # @return [String] a json representation of this resource
     def to_json(options = {})
       as_json(options).to_json
