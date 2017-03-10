@@ -227,7 +227,7 @@ module TinyClient
     # Destroy this resource. It will call delete on this resource id.
     # DELETE /path/id
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-    # @raise ResourceError if this resource does not have an id.
+    # @raise [ResourceError] if this resource does not have an id.
     # @return the deleted resource
     def destroy!
       raise ResourceError, 'Cannot delete resource if @id not present' if id.blank?
@@ -240,8 +240,10 @@ module TinyClient
     # It will do a GET request on the resource id (:show)
     # @param [Hash] params optional query parameters
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+    # @raise [ResourceError] if this resource does not have an id.
     # @return self with updated fields.
     def load!(params = {})
+      raise ResourceError, 'Cannot delete resource if @id not present' if id.blank?
       # get the values from the persistence layer
       reloaded = self.class.show(@id, params)
       clone_fields(reloaded)

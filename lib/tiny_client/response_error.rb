@@ -1,4 +1,5 @@
 module TinyClient
+  # Raised when an HTTP error occured during the request. See {Response#error?}
   class ResponseError < StandardError
     attr_reader :response
 

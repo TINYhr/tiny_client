@@ -1,6 +1,7 @@
 require 'active_support/core_ext/hash'
 
 module TinyClient
+  # Convenient class used to build a request URL.
   class UrlBuilder
     SEPARATOR = '/'.freeze
     attr_writer :query

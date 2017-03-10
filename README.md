@@ -52,6 +52,8 @@ class Book < TinyClient::Resource
 end
 ```
 
+#### Usage
+
 Now you will be able to this: 
 
 ```ruby
