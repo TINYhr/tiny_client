@@ -9,7 +9,7 @@ module Dummy
     fields :id, :name, :info
 
     def birthday
-      Date.parse info['birthday']
+      info['birthday']
     end
   end
 end

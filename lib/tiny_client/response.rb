@@ -1,4 +1,4 @@
-require 'json/ext'
+require 'active_support/json/decoding'
 require 'active_support/gzip'
 
 module TinyClient
@@ -14,13 +14,11 @@ module TinyClient
       @url = curb.url
     end
 
-    # Convert the response json body into an object.
-    # @param [Class] object_class the return class.
-    # @return the parsed response body as an instance of `object_class` or nil if empty body.
-    def parse_body(object_class = OpenStruct)
-      params = { object_class: object_class } if object_class.present?
+    # Convert the response json body into an hash.
+    # @return the parsed response body
+    def parse_body
       body = gzip? ? gzip_decompress : body_str
-      JSON.parse(body, params) if body.present?
+      ActiveSupport::JSON.decode(body) if body.present?
     end
 
     # @return true if this response Content-Encoding is gzip

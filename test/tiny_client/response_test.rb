@@ -21,8 +21,7 @@ describe TinyClient::Response do
 
     describe '#parse_body' do
       it 'create the proper response body object' do
-        response.parse_body.must_equal OpenStruct.new(body)
-        response.parse_body(Hash).must_equal body
+        response.parse_body.must_equal body
       end
     end
   end
@@ -36,7 +35,7 @@ describe TinyClient::Response do
       response.error?.must_equal true
       response.client_error?.must_equal true
       response.code.must_equal 404
-      response.parse_body.must_equal OpenStruct.new(body)
+      response.parse_body.must_equal body.stringify_keys
       response.url.must_equal 'toto'
     end
   end

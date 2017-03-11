@@ -1,5 +1,6 @@
 require 'set'
-
+require 'active_support/json'
+require 'active_support/core_ext/object/json'
 module TinyClient
   # This is the core of TinyClient.
   # Subclass {TinyClient::Resource} in order to create an HTTP/JSON tiny client.
@@ -171,11 +172,11 @@ module TinyClient
       # @param [Response] response obtained from making a request.
       # @return [Resource, Enumerator, nil] the resources created from the given response.
       def from_response(response)
-        body = response.parse_body(nil)
+        body = response.parse_body
         return from_hash(body, false) if body.is_a? Hash
         return Enumerator.new(body.size) do |yielder|
           inner = body.each
-          loop { yielder << from_hash(inner.next) }
+          loop { yielder << from_hash(inner.next, false) }
         end if body.is_a? Array
         body
       end
@@ -257,21 +258,15 @@ module TinyClient
       @changes.clear
     end
 
-    # @param [Hash] options see {as_json}
-    # @return [String] a json representation of this resource
-    def to_json(options = {})
-      as_json(options).to_json
-    end
-
+    # see http://edgeguides.rubyonrails.org/active_support_core_extensions.html#json-support
     # @param [Hash] options for the hash transformation
     # @option [Array] only limit the hash content to those fields
     # @return [Hash] a json ready representation of this resource
     def as_json(options = {})
-      fields = self.class.fields & (options[:only] || self.class.fields)
-      fields.each_with_object({}) do |field, h|
+      self.class.fields.each_with_object({}) do |field, h|
         value = send(field)
         h[field] = value if value
-      end
+      end.as_json(options)
     end
 
     alias to_h as_json

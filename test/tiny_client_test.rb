@@ -21,7 +21,7 @@ describe TinyClient do
 
       it { response.count.must_equal 1 }
       it { response.first.must_be_instance_of Dummy::Post }
-      it { response.first.as_json.must_equal posts[0] }
+      it { response.first.as_json.must_equal posts[0].stringify_keys }
     end
 
     describe '#add_post' do
@@ -43,15 +43,16 @@ describe TinyClient do
     end
 
     describe '#self.show(1)' do
-      let(:author1) { { name: 'P.K.D', info:  { birthday: '1928-12-16', gender: 'male' } } }
+      let(:author1) { { name: 'P.K.D', info:  { birthday: Date.new(1928, 12, 16), gender: 'male' } } }
 
       let(:resource) { Dummy::Author.show(1) }
 
       before do
+        ActiveSupport.parse_json_times = true # I want to convert time/date looking string
         stub_request(:get, Dummy::Config.instance.url + '/authors/1.json').to_return(body: author1.to_json)
       end
 
-      it { resource.birthday.must_equal Date.parse('1928-12-16') }
+      it { resource.birthday.must_equal author1[:info][:birthday] }
       it { resource.name.must_equal author1[:name] }
       it { resource.info.must_equal author1[:info].stringify_keys }
     end
@@ -74,7 +75,7 @@ describe TinyClient do
           post.name = 'toto'
           post.content = 'tata'
           stub_request(:post, Dummy::Config.instance.url + '/posts.json')
-            .to_return(body: { post: post }.to_json)
+            .to_return(body: post.to_json)
           response
         end
         it { response.must_be_instance_of Dummy::Post }
@@ -132,7 +133,7 @@ describe TinyClient do
 
         it { subject.count.must_equal 3 }
         it { subject.first.must_be_instance_of Dummy::Post }
-        it { subject.first.as_json.must_equal posts[0] }
+        it { subject.first.as_json.must_equal posts[0].stringify_keys }
       end
 
       describe '#self.show(1)' do
@@ -141,7 +142,7 @@ describe TinyClient do
         subject { Dummy::Post.show(1) }
 
         it { subject.must_be_instance_of Dummy::Post }
-        it { subject.as_json.must_equal posts[0] }
+        it { subject.as_json.must_equal posts[0].stringify_keys }
         it 'request with proper headers' do
           subject
           assert_requested :get, Dummy::Config.instance.url + '/posts/1.json',
@@ -156,7 +157,7 @@ describe TinyClient do
         subject { Dummy::Post.show(1) }
 
         it { subject.must_be_instance_of Dummy::Post }
-        it { subject.as_json.must_equal posts[0] }
+        it { subject.as_json.must_equal posts[0].stringify_keys }
         it 'request with proper headers' do
           subject
           assert_requested :get, Dummy::Config.instance.url + '/posts/1.json',
