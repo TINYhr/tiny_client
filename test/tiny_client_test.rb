@@ -21,7 +21,7 @@ describe TinyClient do
 
       it { response.count.must_equal 1 }
       it { response.first.must_be_instance_of Dummy::Post }
-      it { response.first.as_json.must_equal posts[0].stringify_keys }
+      it { response.first.as_json.must_equal('id' => 1, 'name' => 'toto', 'content' => nil) }
     end
 
     describe '#add_post' do
@@ -38,7 +38,7 @@ describe TinyClient do
       it { response.content.must_equal post.content }
       it 'create a new post for this author' do
         assert_requested :post, "#{Dummy::Config.instance.url}/authors/1/posts.json",
-                         body: { post: post }.to_json
+                         body: { post: post.as_json(only: post.changes) }.to_json
       end
     end
 

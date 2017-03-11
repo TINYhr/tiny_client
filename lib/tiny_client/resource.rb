@@ -264,8 +264,7 @@ module TinyClient
     # @return [Hash] a json ready representation of this resource
     def as_json(options = {})
       self.class.fields.each_with_object({}) do |field, h|
-        value = send(field)
-        h[field] = value if value
+        h[field] = send(field)
       end.as_json(options)
     end
 
