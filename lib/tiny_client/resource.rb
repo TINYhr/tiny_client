@@ -103,7 +103,7 @@ module TinyClient
         url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).query(params).build!
         resp = CurbRequestor.perform_get(url, { 'Accept' => 'application/json',
                                                 'Content-Type' => 'application/x-www-form-urlencoded'
-                                              }.merge!(@conf.headers))
+                                              }.merge!(@conf.headers), @conf.connect_timeout)
         (resource_class || self).from_response resp
       end
 
@@ -115,7 +115,7 @@ module TinyClient
         url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).build!
         resp = CurbRequestor.perform_post(url, { 'Accept' => 'application/json',
                                                  'Content-Type' => 'application/json'
-                                               }.merge!(@conf.headers), data.to_json)
+                                               }.merge!(@conf.headers), data.to_json, @conf.connect_timeout)
         (resource_class || self).from_response resp
       end
 
@@ -137,7 +137,7 @@ module TinyClient
         url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).build!
         resp = CurbRequestor.perform_put(url, { 'Accept' => 'application/json',
                                                 'Content-Type' => 'application/json'
-                                              }.merge!(@conf.headers), data.to_json)
+                                              }.merge!(@conf.headers), data.to_json, @conf.connect_timeout)
         (resource_class || self).from_response resp
       end
 
@@ -147,7 +147,7 @@ module TinyClient
         url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).build!
         resp = CurbRequestor.perform_delete(url, { 'Accept' => 'application/json',
                                                    'Content-Type' => 'application/x-www-form-urlencoded'
-                                              }.merge!(@conf.headers))
+                                              }.merge!(@conf.headers), @conf.connect_timeout)
         (resource_class || self).from_response resp
       end
 

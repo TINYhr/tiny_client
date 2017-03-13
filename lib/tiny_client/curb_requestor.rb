@@ -4,50 +4,59 @@ module TinyClient
   # Allows to perform request with Curb and wrapped the response.
   # Curb client are attached to a current thread Fiber. ( One curb per Fiber. )
   module CurbRequestor
-    # Perform a get request with Curl
-    # @param url [String] the full url
-    # @param headers [Hash] the request headers
-    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-    # @return [TinyClient::Response] the request response
-    def self.perform_get(url, headers)
-      response = Response.new(Curl.get(url) { |c| c.headers = headers })
-      raise ResponseError.new(response) if response.error?
-      response
-    end
+    class << self
+      # Perform a get request with Curl
+      # @param [String] url the full url
+      # @param [Hash] headers  the request headers
+      # @param [Integer] connect_timeout timeout if the request connection go over (in second)
+      # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+      # @return [TinyClient::Response] the request response
+      def perform_get(url, headers, connect_timeout)
+        perform(:GET, url, nil, nil, headers: headers, connect_timeout: connect_timeout)
+      end
 
-    # Perform a put request with Curl
-    # @param url [String] the full url
-    # @param headers [Hash] the request headers
-    # @param content [String] the request body content
-    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-    # @return [TinyClient::Response] the request response
-    def self.perform_put(url, headers, content)
-      response = Response.new(Curl.put(url, content) { |c| c.headers = headers })
-      raise ResponseError.new(response) if response.error?
-      response
-    end
+      # Perform a put request with Curl
+      # @param [String] url the full url
+      # @param [Hash] headers  the request headers
+      # @param [String] content the request body content
+      # @param [Integer] connect_timeout timeout if the request connection go over (in second)
+      # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+      # @return [TinyClient::Response] the request response
+      def perform_put(url, headers, content, connect_timeout)
+        perform(:PUT, url, nil, content, headers: headers, connect_timeout: connect_timeout)
+      end
 
-    # Perform a post request with Curl
-    # @param url [String] the full url
-    # @param headers [Hash] the request headers
-    # @param content [String] the request body content
-    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-    # @return [TinyClient::Response] the request response
-    def self.perform_post(url, headers, content)
-      response = Response.new(Curl.post(url, content) { |c| c.headers = headers })
-      raise ResponseError.new(response) if response.error?
-      response
-    end
+      # Perform a post request with Curl
+      # @param [String] url the full url
+      # @param [Hash] headers  the request headers
+      # @param [String] content the request body content
+      # @param [Integer] connect_timeout timeout if the request connection go over (in second)
+      # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+      # @return [TinyClient::Response] the request response
+      def perform_post(url, headers, content, connect_timeout)
+        perform(:POST, url, content, nil, headers: headers, connect_timeout: connect_timeout)
+      end
 
-    # Perform a delete request with Curl
-    # @param url [String] the full url
-    # @param headers [Hash] the request headers
-    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-    # @return [TinyClient::Response] the request response
-    def self.perform_delete(url, headers)
-      response = Response.new(Curl.delete(url) { |c| c.headers = headers })
-      raise ResponseError.new(response) if response.error?
-      response
+      # Perform a delete request with Curl
+      # @param [String] url the full url
+      # @param [Hash] headers  the request headers
+      # @param [Integer] connect_timeout timeout if the request connection go over (in second)
+      # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+      # @return [TinyClient::Response] the request response
+      def perform_delete(url, headers, connect_timeout)
+        perform(:DELETE, url, nil, nil, headers: headers, connect_timeout: connect_timeout)
+      end
+
+      private
+
+      def perform(verb, url, post_body, put_data, options = {})
+        response = Response.new(Curl.http(verb, url, post_body, put_data) do |c|
+          c.headers = options[:headers]
+          c.connect_timeout = options[:connect_timeout]
+        end)
+        raise ResponseError, response if response.error?
+        response
+      end
     end
   end
 end
