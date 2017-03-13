@@ -2,8 +2,7 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem 'curb'
-gem 'activesupport', '>= 4.0', '< 6.0'
+# gem are specified in tiny-client.gemspec
 
 group :test, :development do
   gem 'minitest'
