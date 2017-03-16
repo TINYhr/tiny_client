@@ -172,13 +172,19 @@ module TinyClient
       # @param [Response] response obtained from making a request.
       # @return [Resource, Enumerator, nil] the resources created from the given response.
       def from_response(response)
+        Thread.current[:_tclr] = response
         body = response.parse_body
         return from_hash(body, false) if body.is_a? Hash
-        return Enumerator.new(response.total_count || body.size) do |yielder|
+        return Enumerator.new(body.size) do |yielder|
           inner = body.each
           loop { yielder << from_hash(inner.next, false) }
         end if body.is_a? Array
         body
+      end
+
+      # @return [Response] the last response that has been received for that resource
+      def last_response
+        Thread.current[:_tclr]
       end
 
       private
