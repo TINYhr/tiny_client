@@ -21,6 +21,13 @@ module TinyClient
       ActiveSupport::JSON.decode(body) if body.present?
     end
 
+    # Parse the X-Total-Count header
+    # @return [Integer] the value of the X-Total-Count header, or nil if not present
+    def total_count
+      count = header_str[/X-Total-Count: ([0-9]+)/, 1]
+      count.present? ? count.to_i : nil
+    end
+
     # @return true if this response Content-Encoding is gzip
     def gzip?
       /Content-Encoding: gzip/ =~ header_str

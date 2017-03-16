@@ -174,7 +174,7 @@ module TinyClient
       def from_response(response)
         body = response.parse_body
         return from_hash(body, false) if body.is_a? Hash
-        return Enumerator.new(body.size) do |yielder|
+        return Enumerator.new(response.total_count || body.size) do |yielder|
           inner = body.each
           loop { yielder << from_hash(inner.next, false) }
         end if body.is_a? Array
