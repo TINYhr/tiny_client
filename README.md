@@ -24,21 +24,23 @@ class MyConf < TinyClient::Configuration
 
   def initialize
     @url = 'http://localhost:3000/api/1.0'
-    @headers = { 'Authorization' => 'token asdfasf4ffsafasdf@12rfsdfa' }  
+    @headers = { 'Authorization' => 'token asdfasf4ffsafasdf@12rfsdfa' }
+    @limit = 100
+    @connect_timeout = 30 # seconds
   end
 end
 
 ```
 
-You can use that configuration in your resource. 
+You can use that configuration in your resource.
 
 
 ```ruby
 class Author < TinyClient::Resource
   conf MyConf.instance
-  
+
   path 'authors' # query will be made on http://localhost:3000/api/1.0/authors
-  
+
   fields :id, :name # your resource attributes
 
   nested Books # your resource nested resource
@@ -53,7 +55,7 @@ end
 
 #### Usage
 
-Now you will be able to this: 
+Now you will be able to this:
 
 ```ruby
 author = Author.show(1) # Get /authors/1.json
@@ -78,22 +80,22 @@ first = ed_books.first
 first.load! # GET /books/{first.id}.json
 first.name.present?
 
-# You can also navigate through all resources 
+# You can also navigate through all resources
 
-ed.books_all do |book| # It will retrieve all the books, using limit, and offset query params to query the server in batch
- # Do something for each books
+Author.index_all do |author| # It will retrieve all the authors, using limit, and offset query params to paginate
+ # Do something for each author
 end
 
 
-ed.books_in_batches(limit: 1000) do |books|
-  # retrieve books by batch of 1000
+Author.index_in_batches(limit: 1000) do |authors|
+  # retrieve authors by batch of 1000
 end
 
 ```
 
 ### Instance methods behavior
 
-#### load! 
+#### load!
 
 It will perform a get request on the resource id and set the resource fields value to the value retrived by the response.
 
@@ -124,11 +126,45 @@ You can now which fields has been marked has changed with `#changes`
 
 Changes is automatically clear when you perform a request ( i.e call, `#show #index #get #put #post save!` and so on)
 
-### Constraint
+### Nested resource
+
+You can add a nested resource thanks to the `nested` class methods.
+
+```ruby
+class Author < TinyClient::Resource
+  nested Books, Magazines
+end
+```
+
+It will allows you to call your nested resource directly from an instance of your parent resource.
+
+```ruby
+author = Author.show(1)
+author.books(limit: 100)  # index GET /authors/1/books.json?limit=100
+book = author.book(1)     # show  GET/authors/1/books/1.json
+book.title = 'New title'
+author.update_book(book)  # update  PUT /authors/1/books/1.json -- { 'book': { 'title': 'New title' } }
+author.remove_book(book)  # destroy DELETE /authors/1/books/1.json
+author.add_book(book)     # create  POST /author/1/books.json -- { 'book': { 'title': 'New title' } }
+```
+
+This is equivalent to the following:
+
+```ruby
+author = Author.show(1)
+author.nested_index(Book, limit: 100)
+book = author.nested_show(Book, 1)
+book.title = 'New title'
+author.nested_update(book)
+author.nested_delete(book)
+author.nested_create(book)
+```
+
+### Constraint & Support
 
 #### JSON only
 
-TinyClient supports only JSON data. 
+TinyClient supports only JSON data.
 `Accept: application/json` header is set.
 
 #### POST/PUT create/update
@@ -154,5 +190,3 @@ Author.index_all({limit: 100}) # Will queries the server by batch of 100, until 
 
 TinyClient support `gzip` Content-Encoding. Response with `gzip` Content-Encoding will be automatically decompressed.
 You can set the `Accept-Encoding: gzip` through the configuration headers.
- 
-

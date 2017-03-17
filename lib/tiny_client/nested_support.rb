@@ -1,13 +1,13 @@
 module TinyClient
   #
   # Mixin that add support for nested resource to {TinyClient::Resource}
-  #
   # Each nested resource will be accessible with:
   #    <resource_name>s                 # List the existing     ( index )
   #    <resource_name>(id)              # Show an existing      ( show )
   #    add_<resource_name>(resource)    # To create a new one   ( post )
   #    remove_<resource_name>(resource) # Remove an existing    ( delete )
   #    update_<resource_name>(resource) # Update an existing    ( put )
+  # @see file:README.md#label-Nested+resource README - Nested Resource
   module NestedSupport
     # @raise [ArgumentError] if the given resource_class is not a Resource
     def self.included(resource_class)

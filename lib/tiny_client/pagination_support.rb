@@ -10,7 +10,7 @@ module TinyClient
     # All methods return an enumerator that will query the server in batch based on the limit size
     # and total number of items.
     module ClassMethods
-      # Similar to {Resource#index} but return all resources available at this path.
+      # Similar to {Resource.index} but return all resources available at this path.
       # It use limit and offset
       # params to retrieved all resources. ( buffered by the limit size)
       def index_all(params = {})
