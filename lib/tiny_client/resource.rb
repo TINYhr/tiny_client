@@ -8,7 +8,8 @@ module TinyClient
   # {file:README.md Getting Started}
   # @author @barjo
   class Resource
-    include Nested
+    include PaginationSupport
+    include NestedSupport
 
     # A resource always have an id
     attr_accessor :id
@@ -39,44 +40,6 @@ module TinyClient
       # @return [Enumerator] enumerate the resources available at this path.
       def index(params = {})
         get(params)
-      end
-
-      # Similar to {index} but return all resources available at this path. It use limit and offset
-      # params to retrieved all resources. ( buffered by the limit size)
-      def index_all(params = {})
-        get_all(params)
-      end
-
-      # Similar to {index_all}, the return enumerator will yield on the buffered ( limit )
-      # rather than each element.
-      def index_in_batches(params = {})
-        get_in_batches(params)
-      end
-
-      def get_all(params = {}, id = nil, name = nil, resource_class = nil)
-        Enumerator.new do |y|
-          count = limit = params.fetch(:limit, @conf.limit || 100)
-          offset = params.fetch(:offset, 0)
-          while limit == count
-            inner = get(params.merge(limit: limit, offset: offset), id, name, resource_class)
-            loop { y << inner.next }
-            offset += limit
-            count = inner.count
-          end
-        end
-      end
-
-      def get_in_batches(params = {}, id = nil, name = nil, resource_class = nil)
-        Enumerator.new do |y|
-          count = limit = params.fetch(:limit, @conf.limit || 100)
-          offset = params.fetch(:offset, 0)
-          while limit == count
-            inner = get(params.merge(limit: limit, offset: offset), id, name, resource_class)
-            loop { y << inner }
-            offset += limit
-            count = inner.count
-          end
-        end
       end
 
       # POST /<resource_path>.json

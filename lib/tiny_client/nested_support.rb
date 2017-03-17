@@ -7,7 +7,7 @@ module TinyClient
   #    <resource_name>s              # List the existing     ( get )
   #    all_<resource_name>s          # List all the existing ( buffered by limit )
   #    <resource_name>s_in_batches   # List all in bactches  ( batch size is limit )
-  module Nested
+  module NestedSupport
     def self.included(resource_class)
       raise ArgumentError, 'Works only for TinyClient::Resource' unless resource_class <= Resource
       resource_class.extend(ClassMethods)
