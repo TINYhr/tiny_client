@@ -128,6 +128,11 @@ module TinyClient
         resource
       end
 
+      # @return [Response] the last response that has been received for that resource
+      def last_response
+        Thread.current[:_tclr]
+      end
+
       protected
 
       # Create a resource instance from a {Response}.
@@ -143,11 +148,6 @@ module TinyClient
           loop { yielder << build(inner.next, false) }
         end if body.is_a? Array
         body
-      end
-
-      # @return [Response] the last response that has been received for that resource
-      def last_response
-        Thread.current[:_tclr]
       end
 
       private
