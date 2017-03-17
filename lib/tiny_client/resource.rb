@@ -121,7 +121,9 @@ module TinyClient
       # @param [Boolean] track_changes if true all fields will be marked has changed
       # @return [Resource] the newly created resource
       def build(hash, track_changes = true)
-        resource = fields.each_with_object(new) { |field, r| r.send("#{field}=", hash[field.to_s]) }
+        resource = fields.each_with_object(new) do |field, r|
+          r.send("#{field}=", hash[field.to_s] || hash[field.to_sym])
+        end
         resource.clear_changes! unless track_changes
         resource
       end
