@@ -16,7 +16,7 @@ module TinyClient
 
     # @return [Integer] request connection timeout in seconds
     def connect_timeout
-      @connect_timeout || 30
+      @connect_timeout ||= 30
     end
   end
 end

@@ -3,33 +3,54 @@ module TinyClient
   # Mixin that add support for nested resource to {TinyClient::Resource}
   #
   # Each nested resource will be accessible with:
-  #    add_<resource_name>(resource) # To create a new one
-  #    <resource_name>s              # List the existing     ( get )
-  #    all_<resource_name>s          # List all the existing ( buffered by limit )
-  #    <resource_name>s_in_batches   # List all in bactches  ( batch size is limit )
+  #    <resource_name>s                 # List the existing     ( index )
+  #    <resource_name>(id)              # Show an existing      ( show )
+  #    add_<resource_name>(resource)    # To create a new one   ( post )
+  #    remove_<resource_name>(resource) # Remove an existing    ( delete )
+  #    update_<resource_name>(resource) # Update an existing    ( put )
   module NestedSupport
+    # @raise [ArgumentError] if the given resource_class is not a Resource
     def self.included(resource_class)
       raise ArgumentError, 'Works only for TinyClient::Resource' unless resource_class <= Resource
       resource_class.extend(ClassMethods)
     end
 
+    # @raise [ArgumentError] if the given resource_class is not a Resource
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-    def get_nested(resource_class, params = {})
+    def nested_show(resource_class, id, params = {})
+      raise ArgumentError, 'Works only for TinyClient::Resource' unless resource_class <= Resource
+      path = UrlBuilder.url(resource_class.path).path(id).build!
+      self.class.get(params, @id, path, resource_class)
+    end
+
+    # @raise [ArgumentError] if the given resource_class is not a Resource
+    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+    def nested_index(resource_class, params = {})
+      raise ArgumentError, 'Works only for TinyClient::Resource' unless resource_class <= Resource
       self.class.get(params, @id, resource_class.path, resource_class)
     end
 
+    # @raise [ArgumentError] if the given resource does not have an id or is not Resource instance
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-    def get_nested_all(resource_class, params = {})
-      self.class.get_all(params, @id, resource_class.path, resource_class)
+    def nested_update(resource)
+      raise ArgumentError, 'resource must be an TinyClient::Resource' unless resource.is_a? Resource
+      raise ArgumentError, 'resource must have id set' if resource.id.nil?
+      path = UrlBuilder.url(resource.class.path).path(resource.id).build!
+      data = { resource.class.low_name => resource.as_json(only: resource.changes.to_a) }
+      self.class.put(data, @id, path, resource.class)
+    end
+
+    # @raise [ArgumentError] if the given resource does not have an id or is not a Resource instance
+    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+    def nested_delete(resource)
+      raise ArgumentError, 'resource must be an TinyClient::Resource' unless resource.is_a? Resource
+      raise ArgumentError, 'resource must have id set' if resource.id.nil?
+      path = UrlBuilder.url(resource.class.path).path(resource.id).build!
+      self.class.delete(@id, path, resource.class)
     end
 
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-    def get_nested_in_batches(resource_class, params = {})
-      self.class.get_in_batches(params, @id, resource_class.path, resource_class)
-    end
-
-    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
-    def create_nested(resource)
+    def nested_create(resource)
       raise ArgumentError, 'resource must be an TinyClient::Resource' unless resource.is_a? Resource
       data = { resource.class.low_name => resource.as_json(only: resource.changes.to_a) }
       self.class.post(data, @id, resource.class.path, resource.class)
@@ -37,8 +58,6 @@ module TinyClient
 
     # Add support for the {#nested} class methods as well as default actions.
     module ClassMethods
-      attr_reader :nested
-
       # Set nested resources. Nested resource creation and getters method will be created.
       # If the resource class is called Post, then `add_post` and `posts` methods will be created.
       # @param [Resource] clazz the nested resource class.
@@ -51,10 +70,11 @@ module TinyClient
       def nested_actions(nested)
         nested.each do |clazz|
           class_eval <<-RUBY
-            def #{clazz.low_name}s(params = {}); get_nested(#{clazz}, params) end
-            def all_#{clazz.low_name}s(params = {}); get_nested_all(#{clazz}, params) end
-            def #{clazz.low_name}s_in_batches(params = {}); get_nested_in_batches(#{clazz}, params) end
-            def add_#{clazz.low_name}(resource); create_nested(resource) end
+            def #{clazz.low_name}s(params = {}); nested_index(#{clazz}, params) end
+            def #{clazz.low_name}(id, params = {}); nested_show(#{clazz}, id, params) end
+            def add_#{clazz.low_name}(#{clazz.low_name}); nested_create(#{clazz.low_name}) end
+            def update_#{clazz.low_name}(#{clazz.low_name}); nested_update(#{clazz.low_name}) end
+            def remove_#{clazz.low_name}(#{clazz.low_name}); nested_delete(#{clazz.low_name}) end
           RUBY
         end
       end

@@ -15,8 +15,6 @@ module TinyClient
     attr_accessor :id
 
     class << self
-      attr_reader :path, :fields
-
       # Set this resource client configuration
       # @param [Configuration] config the api url and client default headers.
       def conf(config)
