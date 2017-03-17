@@ -47,6 +47,16 @@ module TinyClient
         perform(:DELETE, url, nil, nil, headers: headers, connect_timeout: connect_timeout)
       end
 
+      # Perform a head request with Curl
+      # @param [String] url the full url
+      # @param [Hash] headers  the request headers
+      # @param [Integer] connect_timeout timeout if the request connection go over (in second)
+      # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+      # @return [TinyClient::Response] the request response
+      def perform_head(url, headers, connect_timeout)
+        perform(:HEAD, url, nil, nil, headers: headers, connect_timeout: connect_timeout)
+      end
+
       private
 
       def perform(verb, url, post_body, put_data, options = {})
