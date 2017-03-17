@@ -120,7 +120,7 @@ module TinyClient
       # @param [Hash] hash the resource fields with their values
       # @param [Boolean] track_changes if true all fields will be marked has changed
       # @return [Resource] the newly created resource
-      def from_hash(hash, track_changes = true)
+      def build(hash, track_changes = true)
         resource = fields.each_with_object(new) { |field, r| r.send("#{field}=", hash[field.to_s]) }
         resource.clear_changes! unless track_changes
         resource
@@ -135,10 +135,10 @@ module TinyClient
       def from_response(response)
         Thread.current[:_tclr] = response
         body = response.parse_body
-        return from_hash(body, false) if body.is_a? Hash
+        return build(body, false) if body.is_a? Hash
         return Enumerator.new(body.size) do |yielder|
           inner = body.each
-          loop { yielder << from_hash(inner.next, false) }
+          loop { yielder << build(inner.next, false) }
         end if body.is_a? Array
         body
       end
