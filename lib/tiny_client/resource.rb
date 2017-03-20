@@ -185,11 +185,8 @@ module TinyClient
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
     # @return [Resource] the updated resource
     def save!
-      saved = if id.present?
-                self.class.update(id, as_json(only: @changes.to_a))
-              else
-                self.class.create(as_json(only: @changes.to_a))
-              end
+      data = @changes.to_a.each_with_object({}) { |field, h| h[field] = send(field) }
+      saved = id.present? ? self.class.update(id, data) : self.class.create(data)
       clone_fields(saved)
       clear_changes!
       self
