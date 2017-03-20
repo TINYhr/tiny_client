@@ -138,6 +138,7 @@ module TinyClient
       # Create a resource instance from a {Response}.
       # If the response contains an Array of resource hash, an Enumerator will be return.
       # @param [Response] response obtained from making a request.
+      # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       # @return [Resource, Enumerator, nil] the resources created from the given response.
       def from_response(response)
         Thread.current[:_tclr] = response
@@ -147,7 +148,7 @@ module TinyClient
           inner = body.each
           loop { yielder << build(inner.next, false) }
         end if body.is_a? Array
-        body
+        body # no content
       end
 
       private
