@@ -15,7 +15,7 @@ describe TinyClient::NestedSupport do
   it { resource.must_respond_to :nested_delete }
   it { resource.must_respond_to :nested_all } # pagination
 
-  describe '#nested_index' do
+  describe 'ClassMethods#nested_index' do
     it 'properly delegate to Resource#get' do
       Parent.expects(:get).with({}, resource.id, Children.path, Children).returns(Children.new)
       resource.nested_index(Children, {}).is_a?(Children).must_equal true
@@ -24,7 +24,7 @@ describe TinyClient::NestedSupport do
     it { proc { resource.nested_index(String, {}) }.must_raise ArgumentError }
   end
 
-  describe '#nested_all' do
+  describe 'ClassMethods#nested_all' do
     it 'properly delegate to PaginationSupport#get_all' do
       Parent.expects(:get_all).with({}, resource.id, Children.path, Children).returns(Children.new)
       resource.nested_all(Children, {}).is_a?(Children).must_equal true
