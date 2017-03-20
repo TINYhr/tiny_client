@@ -23,6 +23,6 @@ Gem::Specification.new do |s|
 
   s.license = 'Nonstandard'
 
-  s.add_runtime_dependency 'curb', '> 0.7.0'
+  s.add_runtime_dependency 'curb', '> 0.7.0', '< 1.0.0'
   s.add_runtime_dependency 'activesupport', '>= 4.0', '< 6.0'
 end
