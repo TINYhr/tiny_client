@@ -1,28 +1,45 @@
 require 'test_helper'
 
 describe TinyClient::Resource do
-  MyResource = Class.new(TinyClient::Resource)
-  let(:resource) { MyResource.new }
+  TestResource = Class.new(TinyClient::Resource)
+  before { TestResource.fields :id, 'name', :extra }
+  let(:resource) { TestResource.new }
 
-  it { MyResource.must_respond_to :path }
-  it { MyResource.must_respond_to :fields }
+  it { TestResource.must_respond_to :path }
+  it { TestResource.must_respond_to :fields }
 
-  it { MyResource.must_respond_to :low_name }
+  it { TestResource.must_respond_to :low_name }
 
-  it { MyResource.must_respond_to :get }
-  it { MyResource.must_respond_to :index }
-  it { MyResource.must_respond_to :show }
-  it { MyResource.must_respond_to :update }
-  it { MyResource.must_respond_to :delete }
-  it { MyResource.must_respond_to :post }
-  it { MyResource.must_respond_to :put }
+  it { TestResource.must_respond_to :get }
+  it { TestResource.must_respond_to :index }
+  it { TestResource.must_respond_to :show }
+  it { TestResource.must_respond_to :update }
+  it { TestResource.must_respond_to :delete }
+  it { TestResource.must_respond_to :post }
+  it { TestResource.must_respond_to :put }
 
   describe '#self.build' do
-    before { MyResource.fields :id, :name, :toto }
+    it { TestResource.build({}).must_be_instance_of TestResource }
+    it { TestResource.build(id: 1).id.must_equal 1 }
+    it { TestResource.build('id' => 1).id.must_equal 1 }
+    it { proc { TestResource.build(random: '').random }.must_raise NoMethodError }
+  end
 
-    it { MyResource.build({}).must_be_instance_of MyResource }
-    it { MyResource.build(id: 1).id.must_equal 1 }
-    it { MyResource.build('id' => 1).id.must_equal 1 }
-    it { proc { MyResource.build(random: '').random }.must_raise NoMethodError }
+  describe '#self.fields' do
+    let(:resource) { TestResource.new }
+
+    it { resource.must_respond_to :id }
+    it { resource.must_respond_to :name }
+    it { resource.must_respond_to :extra }
+  end
+
+  describe '#self.build' do
+    describe 'when hash params contains non specified fiels' do
+      let(:resource) { TestResource.build(id: 1, name: 'toto', extra: { age: 23 }) }
+
+      it { resource.id.must_equal 1 }
+      it { resource.name.must_equal 'toto' }
+      it { resource.extra.must_equal age: 23 }
+    end
   end
 end
