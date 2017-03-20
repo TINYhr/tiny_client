@@ -146,6 +146,7 @@ book.title = 'New title'
 author.update_book(book)  # update  PUT /authors/1/books/1.json -- { 'book': { 'title': 'New title' } }
 author.remove_book(book)  # destroy DELETE /authors/1/books/1.json
 author.add_book(book)     # create  POST /author/1/books.json -- { 'book': { 'title': 'New title' } }
+author.books_all.each     # x GET /authors/1/books.json?limit=.. -- Enumerator -- Retrieve ALL books using limit and offset to handle pagination 
 ```
 
 This is equivalent to the following:
@@ -158,6 +159,7 @@ book.title = 'New title'
 author.nested_update(book)
 author.nested_delete(book)
 author.nested_create(book)
+author.nested_all(Book, limit: 10) # retrieve all books, quering the server by batch of 10;
 ```
 
 ### Constraint & Support

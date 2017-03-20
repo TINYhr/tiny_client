@@ -13,6 +13,7 @@ describe TinyClient::NestedSupport do
   it { resource.must_respond_to :nested_create }
   it { resource.must_respond_to :nested_update }
   it { resource.must_respond_to :nested_delete }
+  it { resource.must_respond_to :nested_all } # pagination
 
   describe '#nested_index' do
     it 'properly delegate to Resource#get' do
@@ -21,6 +22,15 @@ describe TinyClient::NestedSupport do
     end
 
     it { proc { resource.nested_index(String, {}) }.must_raise ArgumentError }
+  end
+
+  describe '#nested_all' do
+    it 'properly delegate to PaginationSupport#get_all' do
+      Parent.expects(:get_all).with({}, resource.id, Children.path, Children).returns(Children.new)
+      resource.nested_all(Children, {}).is_a?(Children).must_equal true
+    end
+
+    it { proc { resource.nested_all(String, {}) }.must_raise ArgumentError }
   end
 
   describe 'when we add a nested resource' do
@@ -33,5 +43,6 @@ describe TinyClient::NestedSupport do
     it { resource.must_respond_to :add_children }
     it { resource.must_respond_to :update_children }
     it { resource.must_respond_to :remove_children }
+    it { resource.must_respond_to :childrens_all }
   end
 end

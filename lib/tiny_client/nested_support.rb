@@ -56,6 +56,14 @@ module TinyClient
       self.class.post(data, @id, resource.class.path, resource.class)
     end
 
+    # @see PaginationSupport::ClassMethods.get_all
+    # @raise [ArgumentError] if the given resource_class is not a Resource
+    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+    def nested_all(resource_class, params = {})
+      raise ArgumentError, 'Works only for TinyClient::Resource' unless resource_class <= Resource
+      self.class.get_all(params, @id, resource_class.path, resource_class)
+    end
+
     # Add support for the {#nested} class methods as well as default actions.
     module ClassMethods
       # Set nested resources. Nested resource creation and getters method will be created.
@@ -75,6 +83,7 @@ module TinyClient
             def add_#{clazz.low_name}(#{clazz.low_name}); nested_create(#{clazz.low_name}) end
             def update_#{clazz.low_name}(#{clazz.low_name}); nested_update(#{clazz.low_name}) end
             def remove_#{clazz.low_name}(#{clazz.low_name}); nested_delete(#{clazz.low_name}) end
+            def #{clazz.low_name}s_all(params = {}); nested_all(#{clazz}, params) end
           RUBY
         end
       end
