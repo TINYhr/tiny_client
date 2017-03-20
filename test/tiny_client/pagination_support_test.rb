@@ -21,10 +21,10 @@ describe TinyClient::PaginationSupport do
     it 'make one query when the first batch contains less than limit' do
       stub_request(:get, 'http://acme.org/my.json').with(query: { limit: 10, offset: 0 })
                                                    .to_return(body: batch.call(1..9).to_json)
-      enum = MyResource.get_all
-      enum.first.must_be_instance_of MyResource
-      enum.first.id.must_equal 1
-      enum.count.must_equal 9
+      first = MyResource.get_all.first
+      first.must_be_instance_of MyResource
+      first.id.must_equal 1
+      assert_requested :get, 'http://acme.org/my.json?limit=10&offset=0', times: 1
     end
 
     it 'make two query when the first batch contains exactly limit' do
@@ -33,6 +33,8 @@ describe TinyClient::PaginationSupport do
       stub_request(:get, 'http://acme.org/my.json').with(query: { limit: 10, offset: 10 })
                                                    .to_return(body: [].to_json)
       MyResource.get_all.count.must_equal 10
+      assert_requested :get, 'http://acme.org/my.json?limit=10&offset=0',  times: 1
+      assert_requested :get, 'http://acme.org/my.json?limit=10&offset=10', times: 1
     end
 
     it 'make three query when there is 28 elements and the limit is 10' do
@@ -42,12 +44,11 @@ describe TinyClient::PaginationSupport do
                                                    .to_return(body: batch.call(11..20).to_json)
       stub_request(:get, 'http://acme.org/my.json').with(query: { limit: 10, offset: 20 })
                                                    .to_return(body: batch.call(21..28).to_json)
-      enum = MyResource.get_all.each
-      enum.each_with_index do |res, i|
-        res.must_be_instance_of MyResource
-        res.id.must_equal(i + 1)
-      end
-      enum.count.must_equal 28
+
+      MyResource.get_all.count.must_equal 28
+      assert_requested :get, 'http://acme.org/my.json?limit=10&offset=0',  times: 1
+      assert_requested :get, 'http://acme.org/my.json?limit=10&offset=10', times: 1
+      assert_requested :get, 'http://acme.org/my.json?limit=10&offset=20', times: 1
     end
   end
 end
