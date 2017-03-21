@@ -36,8 +36,8 @@ module TinyClient
       raise ArgumentError, 'resource must be an TinyClient::Resource' unless resource.is_a? Resource
       raise ArgumentError, 'resource must have id set' if resource.id.nil?
       path = UrlBuilder.url(resource.class.path).path(resource.id).build!
-      data = { resource.class.low_name => resource.as_json(only: resource.changes.to_a) }
-      self.class.put(data, @id, path, resource.class)
+      data = resource.changes.to_a.each_with_object({}) { |fld, h| h[fld] = resource.send(fld) }
+      self.class.put({ resource.class.low_name => data }, @id, path, resource.class)
     end
 
     # @raise [ArgumentError] if the given resource does not have an id or is not a Resource instance
@@ -52,8 +52,8 @@ module TinyClient
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
     def nested_create(resource)
       raise ArgumentError, 'resource must be an TinyClient::Resource' unless resource.is_a? Resource
-      data = { resource.class.low_name => resource.as_json(only: resource.changes.to_a) }
-      self.class.post(data, @id, resource.class.path, resource.class)
+      data = resource.changes.to_a.each_with_object({}) { |fld, h| h[fld] = resource.send(fld) }
+      self.class.post({ resource.class.low_name => data }, @id, resource.class.path, resource.class)
     end
 
     # @see PaginationSupport::ClassMethods.get_all
