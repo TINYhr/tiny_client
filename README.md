@@ -146,7 +146,7 @@ book.title = 'New title'
 author.update_book(book)  # update  PUT /authors/1/books/1.json -- { 'book': { 'title': 'New title' } }
 author.remove_book(book)  # destroy DELETE /authors/1/books/1.json
 author.add_book(book)     # create  POST /author/1/books.json -- { 'book': { 'title': 'New title' } }
-author.books_all.each     # x GET /authors/1/books.json?limit=.. -- Enumerator -- Retrieve ALL books using limit and offset to handle pagination 
+author.books_all.each     # x GET /authors/1/books.json?limit=.. -- Enumerator -- Retrieve ALL books using limit and offset to handle pagination
 ```
 
 This is equivalent to the following:
@@ -192,3 +192,11 @@ Author.index_all({limit: 100}) # Will queries the server by batch of 100, until 
 
 TinyClient support `gzip` Content-Encoding. Response with `gzip` Content-Encoding will be automatically decompressed.
 You can set the `Accept-Encoding: gzip` through the configuration headers.
+
+### Development
+
+You can run the test using:
+
+```shell
+rake
+```

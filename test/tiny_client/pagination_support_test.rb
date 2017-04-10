@@ -7,6 +7,14 @@ describe TinyClient::PaginationSupport do
 
   MyResource = Class.new(TinyClient::Resource)
 
+  class MyConfiguration < TinyClient::Configuration
+    def initialize
+      @limit = 10
+      @url = 'http://acme.org'
+      @headers = {}
+    end
+  end
+
   it { MyResource.must_respond_to :get_all }
   it { MyResource.must_respond_to :index_all }
   it { MyResource.must_respond_to :get_in_batches }
@@ -16,7 +24,7 @@ describe TinyClient::PaginationSupport do
     before do
       MyResource.fields :id
       MyResource.path 'my'
-      MyResource.conf OpenStruct.new(limit: 10, url: 'http://acme.org', headers: {})
+      MyResource.conf MyConfiguration.instance
     end
 
     it { MyResource.get_all.must_be_instance_of Enumerator }
