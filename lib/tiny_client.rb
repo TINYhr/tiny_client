@@ -7,6 +7,7 @@ require 'tiny_client/resource_error'
 require 'tiny_client/resource'
 require 'tiny_client/url_builder'
 require 'tiny_client/configuration'
+require 'tiny_client/remote_client'
 
 # Placeholder
 module TinyClient

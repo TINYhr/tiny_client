@@ -22,5 +22,9 @@ module TinyClient
     def headers
       @headers ||= {}
     end
+
+    def requestor
+      @requestor ||= TinyClient::RemoteClient.new(self)
+    end
   end
 end

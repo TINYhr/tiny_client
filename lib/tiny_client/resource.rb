@@ -61,10 +61,7 @@ module TinyClient
       # GET /<path>/{id}/<name>
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       def get(params = {}, id = nil, name = nil, resource_class = nil)
-        url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).query(params).build!
-        resp = CurbRequestor.perform_get(url, { 'Accept' => 'application/json',
-                                                'Content-Type' => 'application/x-www-form-urlencoded'
-                                              }.merge!(@conf.headers), @conf.connect_timeout)
+        resp = @conf.requestor.get(@path, params, id, name)
         (resource_class || self).from_response resp
       end
 
@@ -73,10 +70,7 @@ module TinyClient
       # @raise [ArgumentError] if data cannot be serialized as a json string ( .to_json )
       def post(data, id = nil, name = nil, resource_class = nil)
         verify_json(data)
-        url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).build!
-        resp = CurbRequestor.perform_post(url, { 'Accept' => 'application/json',
-                                                 'Content-Type' => 'application/json'
-                                               }.merge!(@conf.headers), data.to_json, @conf.connect_timeout)
+        resp = @conf.requestor.post(data, @path, id, name)
         (resource_class || self).from_response resp
       end
 
@@ -95,20 +89,14 @@ module TinyClient
       # @raise [ArgumentError] if data cannot be serialized as a json string ( .to_json )
       def put(data, id = nil, name = nil, resource_class = nil)
         verify_json(data)
-        url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).build!
-        resp = CurbRequestor.perform_put(url, { 'Accept' => 'application/json',
-                                                'Content-Type' => 'application/json'
-                                              }.merge!(@conf.headers), data.to_json, @conf.connect_timeout)
+        resp = @conf.requestor.put(data, @path, id, name)
         (resource_class || self).from_response resp
       end
 
       # delete /<path>/{id}.json
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       def delete(id = nil, name = nil, resource_class = nil)
-        url = UrlBuilder.url(@conf.url).path(@path).path(id).path(name).build!
-        resp = CurbRequestor.perform_delete(url, { 'Accept' => 'application/json',
-                                                   'Content-Type' => 'application/x-www-form-urlencoded'
-                                              }.merge!(@conf.headers), @conf.connect_timeout)
+        resp = @conf.requestor.delete(@path, id, name)
         (resource_class || self).from_response resp
       end
 
