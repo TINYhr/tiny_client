@@ -110,7 +110,8 @@ module TinyClient
       # @return [Resource] the newly created resource
       def build(hash, track_changes = true)
         resource = fields.each_with_object(new) do |field, r|
-          r.send("#{field}=", hash[field.to_s] || hash[field.to_sym])
+          value = hash.fetch(field.to_s, hash[field.to_sym])
+          r.send("#{field}=", value)
         end
         resource.clear_changes! unless track_changes
         resource
