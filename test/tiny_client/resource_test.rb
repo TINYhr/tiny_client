@@ -2,7 +2,7 @@ require 'test_helper'
 
 describe TinyClient::Resource do
   TestResource = Class.new(TinyClient::Resource)
-  before { TestResource.fields :id, 'name', :extra }
+  before { TestResource.fields :id, 'name', :extra, 'bool' }
   let(:resource) { TestResource.new }
 
   it { TestResource.must_respond_to :path }
@@ -35,11 +35,12 @@ describe TinyClient::Resource do
 
   describe '#self.build' do
     describe 'when hash params contains non specified fiels' do
-      let(:resource) { TestResource.build(id: 1, name: 'toto', extra: { age: 23 }) }
+      let(:resource) { TestResource.build(id: 1, name: 'toto', extra: { age: 23 }, 'bool' => false) }
 
       it { resource.id.must_equal 1 }
       it { resource.name.must_equal 'toto' }
-      it { resource.extra.must_equal age: 23 }
+      it { resource.extra.must_equal(age: 23) }
+      it { resource.bool.must_equal false }
     end
   end
 end
