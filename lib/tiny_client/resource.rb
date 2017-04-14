@@ -199,7 +199,7 @@ module TinyClient
     # @raise [ResourceError] if this resource does not have an id.
     # @return self with updated fields.
     def load!(params = {})
-      raise ResourceError, 'Cannot delete resource if @id not present' if id.blank?
+      raise ResourceError, 'Cannot load resource if @id not present' if id.blank?
       # get the values from the persistence layer
       reloaded = self.class.show(@id, params)
       clone_fields(reloaded)
