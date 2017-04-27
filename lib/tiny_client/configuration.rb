@@ -6,7 +6,7 @@ module TinyClient
   # @attr_reader [Integer] limit default limit used as a query param
   class Configuration
     include Singleton
-    attr_reader :url, :limit
+    attr_reader :url, :limit, :verbose
 
     # You need to initialize the api {#url}, default {#headers}, and default limit.
     def initialize
@@ -21,6 +21,12 @@ module TinyClient
     # @return [Hash] headers default headers you want to pass along every request
     def headers
       @headers ||= {}
+    end
+
+    # @return [Boolean] true if curl verbose option is set
+    def verbose
+      @verbose = false if @verbose.nil?
+      @verbose
     end
 
     def requestor

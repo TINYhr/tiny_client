@@ -55,6 +55,15 @@ module TinyClient
       (300..399).cover?(@code)
     end
 
+    def to_s
+      {
+        url: url,
+        status: status,
+        body: body_str,
+        headers: header_str
+      }.to_s
+    end
+
     protected
 
     def gzip_decompress
