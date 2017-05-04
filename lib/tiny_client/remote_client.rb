@@ -5,7 +5,7 @@ module TinyClient
       @config = config
     end
 
-    # GET /<path>/{id}/<name>?<params>
+    #    GET /<path>/<id>/<name>?<params>
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
     # @return [Response]
     def get(path, params, id, name)
@@ -16,8 +16,8 @@ module TinyClient
       }.merge!(@config.headers), @config.connect_timeout, @config.verbose)
     end
 
-    # POST /<path>/{id}/<name>
-    # @data [Hash]
+    #    POST /<path>/<id>/<name>
+    # @param [Hash] data
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
     # @return [Response]
     def post(data, path, id, name)
@@ -28,8 +28,8 @@ module TinyClient
       }.merge!(@config.headers), data.to_json, @config.connect_timeout, @config.verbose)
     end
 
-    # PUT /<path>/{id}/<name>
-    # @data [Hash]
+    #    PUT /<path>/<id>/<name>
+    # @param [Hash] data the resource data
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
     # @return [Response]
     def put(data, path, id, name)
@@ -40,7 +40,7 @@ module TinyClient
       }.merge!(@config.headers), data.to_json, @config.connect_timeout, @config.verbose)
     end
 
-    # DELETE /<path>/{id}.json
+    #    DELETE /<path>/<id>.json
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
     # @return [Response]
     def delete(path, id, name)
