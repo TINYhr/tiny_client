@@ -1,5 +1,0 @@
-require 'minitest/autorun'
-require 'webmock/minitest'
-require 'mocha/mini_test'
-require 'byebug'
-require 'tiny_client'
