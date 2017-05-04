@@ -8,6 +8,7 @@ end
 
 YARD::Rake::YardocTask.new do |t|
   t.files = ['lib/**/*.rb']
+  t.options = ['-o docs']
 end
 
 desc 'Build the gem'
@@ -17,6 +18,6 @@ end
 
 desc 'Clean up'
 task :clean do
-  sh 'rm -rf doc'
+  sh 'rm -rf docs'
   sh 'rm -f tiny-client*.gem'
 end
