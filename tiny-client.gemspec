@@ -1,8 +1,8 @@
 Gem::Specification.new do |s|
   s.name    = 'tiny-client'
   s.authors = ['TINYpulse swat team']
-  s.version = '0.2.5'
-  s.date    = '2017-04-27'
+  s.version = '0.2.6'
+  s.date    = '2017-05-04'
   s.description = 'TINYclient, an HTTP/JSON crud client toolkit.'
   s.email = 'jonathan@tinypulse.com'
   s.extra_rdoc_files = ['LICENSE', 'README.md']
@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   #### Load-time details
   s.require_paths = %w(lib ext)
   s.rubyforge_project = 'tiny-client'
-  s.summary = 'TINYclient, an HTTP/JSON crud client toolkit.'
+  s.summary = 'TINYclient is an HTTP/JSON crud toolkit inspired by ActiveRecord and based on Curb.'
   s.test_files = ['test/tiny_client/']
 
   #### Documentation and testing.
