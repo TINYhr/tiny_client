@@ -11,7 +11,7 @@ module TinyClient
     end
 
     def path(path)
-      @path << path unless path.blank?
+      @path << fix_path(path) unless path.blank?
       self
     end
 
@@ -30,6 +30,14 @@ module TinyClient
     def initialize(url)
       @path = [url]
       @query = {}
+    end
+
+    def fix_path(path)
+      if path.respond_to?(:gsub)
+        path.gsub(/\.json$/, '')
+      else
+        path
+      end
     end
   end
 end
