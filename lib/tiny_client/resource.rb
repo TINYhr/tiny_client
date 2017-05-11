@@ -101,7 +101,7 @@ module TinyClient
       end
 
       def low_name
-        @low_name ||= name.demodulize.downcase
+        @low_name ||= name.demodulize.underscore
       end
 
       # Create a resouce instance from an Hash.

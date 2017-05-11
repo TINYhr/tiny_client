@@ -45,4 +45,32 @@ describe TinyClient::NestedSupport do
     it { resource.must_respond_to :remove_children }
     it { resource.must_respond_to :childrens_all }
   end
+
+  describe 'when we add a nested resource has more than a word in its name' do
+    Role            = Class.new(TinyClient::Resource)
+    AppPermission   = Class.new(TinyClient::Resource)
+    MyAppPermission = Class.new(TinyClient::Resource)
+
+    let(:resource) { Role.new }
+
+    before { Role.nested AppPermission, MyAppPermission }
+
+    it 'has correct methods' do
+      Role.nested.must_equal [AppPermission, MyAppPermission]
+
+      resource.must_respond_to :app_permissions
+      resource.must_respond_to :app_permission
+      resource.must_respond_to :add_app_permission
+      resource.must_respond_to :update_app_permission
+      resource.must_respond_to :remove_app_permission
+      resource.must_respond_to :app_permissions_all
+
+      resource.must_respond_to :my_app_permissions
+      resource.must_respond_to :my_app_permission
+      resource.must_respond_to :add_my_app_permission
+      resource.must_respond_to :update_my_app_permission
+      resource.must_respond_to :remove_my_app_permission
+      resource.must_respond_to :my_app_permissions_all
+    end
+  end
 end
