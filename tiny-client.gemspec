@@ -6,8 +6,8 @@ Gem::Specification.new do |s|
   s.description = 'TINYclient, an HTTP/JSON crud client toolkit.'
   s.email = 'jonathan@tinypulse.com'
   s.extra_rdoc_files = ['LICENSE', 'README.md']
+  s.files = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
 
-  s.files = ['LICENSE', 'README.md', 'Rakefile', 'lib/tiny_client.rb']
   #### Load-time details
   s.require_paths = %w(lib ext)
   s.rubyforge_project = 'tiny-client'
