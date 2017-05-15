@@ -2,7 +2,7 @@ Gem::Specification.new do |s|
   s.name    = 'tiny-client'
   s.authors = ['TINYpulse swat team']
   s.version = '0.3.0'
-  s.date    = '2017-05-15'
+  s.version = "#{s.version}-alpha-#{ENV['TRAVIS_BUILD_NUMBER']}" if ENV['TRAVIS'] && !ENV['TRAVIS_TAG']
   s.description = 'TINYclient, an HTTP/JSON crud client toolkit.'
   s.email = 'jonathan@tinypulse.com'
   s.extra_rdoc_files = ['LICENSE', 'README.md']
