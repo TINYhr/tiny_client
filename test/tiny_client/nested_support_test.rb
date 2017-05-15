@@ -2,7 +2,7 @@ require 'test_helper'
 
 describe TinyClient::NestedSupport do
   Parent = Class.new(TinyClient::Resource)
-  Children = Class.new(TinyClient::Resource)
+  Child = Class.new(TinyClient::Resource)
 
   let(:resource) { Parent.new }
 
@@ -17,8 +17,8 @@ describe TinyClient::NestedSupport do
 
   describe 'ClassMethods#nested_index' do
     it 'properly delegate to Resource#get' do
-      Parent.expects(:get).with({}, resource.id, Children.path, Children).returns(Children.new)
-      resource.nested_index(Children, {}).is_a?(Children).must_equal true
+      Parent.expects(:get).with({}, resource.id, Child.path, Child).returns(Child.new)
+      resource.nested_index(Child, {}).is_a?(Child).must_equal true
     end
 
     it { proc { resource.nested_index(String, {}) }.must_raise ArgumentError }
@@ -26,24 +26,24 @@ describe TinyClient::NestedSupport do
 
   describe 'ClassMethods#nested_all' do
     it 'properly delegate to PaginationSupport#get_all' do
-      Parent.expects(:get_all).with({}, resource.id, Children.path, Children).returns(Children.new)
-      resource.nested_all(Children, {}).is_a?(Children).must_equal true
+      Parent.expects(:get_all).with({}, resource.id, Child.path, Child).returns(Child.new)
+      resource.nested_all(Child, {}).is_a?(Child).must_equal true
     end
 
     it { proc { resource.nested_all(String, {}) }.must_raise ArgumentError }
   end
 
   describe 'when we add a nested resource' do
-    before { Parent.nested Children }
+    before { Parent.nested Child }
 
-    it { Parent.nested.must_equal [Children] }
+    it { Parent.nested.must_equal [Child] }
 
-    it { resource.must_respond_to :childrens }
     it { resource.must_respond_to :children }
-    it { resource.must_respond_to :add_children }
-    it { resource.must_respond_to :update_children }
-    it { resource.must_respond_to :remove_children }
-    it { resource.must_respond_to :childrens_all }
+    it { resource.must_respond_to :child }
+    it { resource.must_respond_to :add_child }
+    it { resource.must_respond_to :update_child }
+    it { resource.must_respond_to :remove_child }
+    it { resource.must_respond_to :children_all }
   end
 
   describe 'when we add a nested resource has more than a word in its name' do

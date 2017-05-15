@@ -1,3 +1,5 @@
+require 'active_support/inflector'
+
 module TinyClient
   #
   # Mixin that add support for nested resource to {TinyClient::Resource}
@@ -77,13 +79,14 @@ module TinyClient
 
       def nested_actions(nested)
         nested.each do |clazz|
+          plural_name = ActiveSupport::Inflector.pluralize(clazz.low_name)
           class_eval <<-RUBY
-            def #{clazz.low_name}s(params = {}); nested_index(#{clazz}, params) end
+            def #{plural_name}(params = {}); nested_index(#{clazz}, params) end
             def #{clazz.low_name}(id, params = {}); nested_show(#{clazz}, id, params) end
             def add_#{clazz.low_name}(#{clazz.low_name}); nested_create(#{clazz.low_name}) end
             def update_#{clazz.low_name}(#{clazz.low_name}); nested_update(#{clazz.low_name}) end
             def remove_#{clazz.low_name}(#{clazz.low_name}); nested_delete(#{clazz.low_name}) end
-            def #{clazz.low_name}s_all(params = {}); nested_all(#{clazz}, params) end
+            def #{plural_name}_all(params = {}); nested_all(#{clazz}, params) end
           RUBY
         end
       end
