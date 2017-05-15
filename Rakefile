@@ -1,6 +1,8 @@
 require 'rake/testtask'
 require 'yard'
 
+task default: [:test]
+
 Rake::TestTask.new do |t|
   t.libs << 'test'
   t.test_files = FileList['test/tiny_client/*_test.rb', 'test/tiny_client_test.rb']
