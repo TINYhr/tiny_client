@@ -15,11 +15,11 @@ end
 
 desc 'Build the gem'
 task gem: [:test] do
-  sh 'gem build tiny-client.gemspec'
+  sh 'gem build tiny_client.gemspec'
 end
 
 desc 'Clean up'
 task :clean do
   sh 'rm -rf docs'
-  sh 'rm -f tiny-client*.gem'
+  sh 'rm -f tiny_client*.gem'
 end
