@@ -1,5 +1,5 @@
 # TINYclient, a tiny HTTP/JSON crud client toolkit
-[![Gem Version](https://badge.fury.io/rb/tiny_client.svg)](https://badge.fury.io/rb/tiny_client) [![Build Status](https://travis-ci.org/TINYhr/tiny-client.svg)](https://travis-ci.org/TINYhr/tiny-client) 
+[![Gem Version](https://badge.fury.io/rb/tiny_client.svg)](https://badge.fury.io/rb/tiny_client) [![Build Status](https://travis-ci.org/TINYhr/tiny_client.svg)](https://travis-ci.org/TINYhr/tiny_client) 
 
 TINYclient is inspired by [Active Record](http://guides.rubyonrails.org/active_record_basics.html) and based on [Curb](https://github.com/taf2/curb).
 
