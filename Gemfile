@@ -5,10 +5,10 @@ gemspec
 # gem are specified in tiny-client.gemspec
 
 group :test, :development do
-  gem 'minitest'
-  gem 'rake'
-  gem 'mocha'
-  gem 'webmock'
   gem 'byebug'
+  gem 'minitest'
+  gem 'mocha'
+  gem 'rake'
+  gem 'webmock'
   gem 'yard'
 end
