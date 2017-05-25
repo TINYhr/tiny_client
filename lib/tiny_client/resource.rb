@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'set'
 require 'active_support/json'
 require 'active_support/core_ext/object/json'
@@ -131,13 +132,15 @@ module TinyClient
       # @return [Resource, Enumerator, nil] the resources created from the given response.
       def from_response(response)
         Thread.current[:_tclr] = response
-        body = response.parse_body
-        return build(body, false) if body.is_a? Hash
-        return Enumerator.new(body.size) do |yielder|
-          inner = body.each
-          loop { yielder << build(inner.next, false) }
-        end if body.is_a? Array
-        body # no content
+        case body = response.parse_body
+        when Hash
+          build(body, false)
+        when Array
+          Enumerator.new(body.size) do |yielder|
+            inner = body.each
+            loop { yielder << build(inner.next, false) }
+          end
+        end
       end
 
       private
