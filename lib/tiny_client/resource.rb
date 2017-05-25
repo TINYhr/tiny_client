@@ -70,7 +70,6 @@ module TinyClient
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       # @raise [ArgumentError] if data cannot be serialized as a json string ( .to_json )
       def post(data, id = nil, name = nil, resource_class = nil)
-        verify_json(data)
         resp = @conf.requestor.post(data, @path, id, name)
         (resource_class || self).from_response resp
       end
@@ -89,7 +88,6 @@ module TinyClient
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       # @raise [ArgumentError] if data cannot be serialized as a json string ( .to_json )
       def put(data, id = nil, name = nil, resource_class = nil)
-        verify_json(data)
         resp = @conf.requestor.put(data, @path, id, name)
         (resource_class || self).from_response resp
       end
@@ -144,10 +142,6 @@ module TinyClient
       end
 
       private
-
-      def verify_json(data)
-        raise ArgumentError, 'data must respond to .to_json' unless data.respond_to? :to_json
-      end
 
       def field_accessor(names)
         names.each do |name|

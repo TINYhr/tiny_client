@@ -22,6 +22,7 @@ module TinyClient
     # @return [Response]
     def post(data, path, id, name)
       url = build_url(path, id, name).build!
+      verify_json(data)
       CurbRequestor.perform_post(url, {
         'Accept' => 'application/json',
         'Content-Type' => 'application/json'
@@ -34,6 +35,7 @@ module TinyClient
     # @return [Response]
     def put(data, path, id, name)
       url = build_url(path, id, name).build!
+      verify_json(data)
       CurbRequestor.perform_put(url, {
         'Accept' => 'application/json',
         'Content-Type' => 'application/json'
@@ -52,6 +54,10 @@ module TinyClient
     end
 
     private
+
+    def verify_json(data)
+      raise ArgumentError, 'data must respond to .to_json' unless data.respond_to? :to_json
+    end
 
     def build_url(path, id, name)
       UrlBuilder.url(@config.url).path(path).path(id).path(name)
