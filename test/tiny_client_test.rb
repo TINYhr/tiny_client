@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'test_helper'
 require 'dummy/post'
 require 'dummy/author'
@@ -27,23 +28,37 @@ describe TinyClient do
     describe '#add_post' do
       let(:post) { Dummy::Post.new('toto', 'tata') }
       let(:response) { author.add_post(post) }
-      before do
-        author.id = 1
-        stub_request(:post, Dummy::Config.instance.url + '/authors/1/posts.json').to_return(body: post.to_json)
-        response
+
+      describe 'when api return the added post' do
+        before do
+          author.id = 1
+          stub_request(:post, Dummy::Config.instance.url + '/authors/1/posts.json').to_return(body: post.to_json)
+        end
+
+        it { response.must_be_instance_of Dummy::Post }
+        it { response.name.must_equal post.name }
+        it { response.content.must_equal post.content }
+        it 'create a new post for this author' do
+          response
+          assert_requested :post, "#{Dummy::Config.instance.url}/authors/1/posts.json",
+                           body: { post: post.as_json(only: post.changes) }.to_json
+        end
       end
 
-      it { response.must_be_instance_of Dummy::Post }
-      it { response.name.must_equal post.name }
-      it { response.content.must_equal post.content }
-      it 'create a new post for this author' do
-        assert_requested :post, "#{Dummy::Config.instance.url}/authors/1/posts.json",
-                         body: { post: post.as_json(only: post.changes) }.to_json
+      describe 'when api return no content' do
+        before do
+          author.id = 1
+          stub_request(:post, Dummy::Config.instance.url + '/authors/1/posts.json').to_return(body: '', status: 204)
+          response
+        end
+
+        it { response.must_be_nil }
+        it { Dummy::Post.last_response.status.must_equal '204' }
       end
     end
 
     describe '#self.show(1)' do
-      let(:author1) { { name: 'P.K.D', info:  { birthday: Date.new(1928, 12, 16), gender: 'male' } } }
+      let(:author1) { { name: 'P.K.D', info: { birthday: Date.new(1928, 12, 16), gender: 'male' } } }
 
       let(:resource) { Dummy::Author.show(1) }
 
@@ -152,7 +167,7 @@ describe TinyClient do
       end
 
       describe '#self.show(1) with gzip content' do
-        before { stub_request(:get, Dummy::Config.instance.url + '/posts/1.json').to_return(body: ActiveSupport::Gzip.compress(posts[0].to_json), headers: {'Content-Encoding' => 'gzip'}) }
+        before { stub_request(:get, Dummy::Config.instance.url + '/posts/1.json').to_return(body: ActiveSupport::Gzip.compress(posts[0].to_json), headers: { 'Content-Encoding' => 'gzip' }) }
 
         subject { Dummy::Post.show(1) }
 
