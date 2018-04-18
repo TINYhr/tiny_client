@@ -1,6 +1,8 @@
+require 'tiny_client/base_error'
+
 module TinyClient
   # Raised when an HTTP error occured during the request. See {Response#error?}
-  class ResponseError < StandardError
+  class ResponseError < BaseError
     attr_reader :response
 
     def initialize(response)
