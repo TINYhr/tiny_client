@@ -77,6 +77,8 @@ module TinyClient
         end)
         raise ResponseError, response if response.error?
         response
+      rescue Curl::Err::ConnectionFailedError => e
+        raise RequestError, e.message
       end
     end
   end
