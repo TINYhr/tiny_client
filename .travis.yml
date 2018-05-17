@@ -4,9 +4,9 @@ rvm:
 deploy:
   provider: rubygems
   api_key:
-    secure: # TBA
-  ruby: 2.4.0
+    secure: rhnpzPKF7/SYka8XSo8ohtIT/YZB+eltG+uK1Yrup+RHYUvvjL5VbGuVXK71ouNtA5g0iA0xHB8lYyXBkC/DsovURjwhYQXymykqWz68yGjCQgl3i0IP8bgntAP5+PYbeOvYpy8DlH+6qakoTewa/cOhYvLLVlE91zk92UFORIW2b0TVxxMASB2cuKBOkI5a7vRpncpBYupIWLMIHwQd2IGPlWCPOx53QumZkuG1Xze8wuxGTdT+Oo4pIJsNZi1Oz5KKbOaYgYOZa29TlXesz43HcTruIIeMJgKuVMOMgSO0OuQGZa2wK5r7frWqepL8fOvkxS1MYM/9CBC2oUDPQMfX8OIbKQrvgmmIWy5gb78PXQzc8nzYXi+D8HZSydL+7lGnW6Jj5wUUcZ/s8pzfUtC5vgVq+mA7HssKwt3vFACh2prDa+EZuas7jDz36ek9GZsKooKHzMaN2gO9um8JfwgonWbqvXJvhz64QOqTu8ySaWX4is0Y93wc+3fLHPtS6gnyG/ClhLtm7PtJ1+LPo6xrn+9dMfcMfpLTq/z1urHJyzj+8NspMp+ZAZVu+WgfmfcX3/UmzOUBcTOCjA4i2L+jEydFgrOJhYXgGp3iCueKUhHmAAFzWkG8Vtt/KgmvW400kjCAjqIKYo+2DZjlqILZbT19Kr/ZMqDiwnB5ozI=
   gem: tp_client
   gemspec: tiny_client.gemspec
   on:
     tags: true
+    repo: TINYhr/tiny_client
