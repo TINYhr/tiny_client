@@ -1,5 +1,5 @@
 require 'minitest/autorun'
 require 'webmock/minitest'
-require 'mocha/mini_test'
+require 'mocha/minitest'
 require 'byebug'
 require 'tiny_client'
