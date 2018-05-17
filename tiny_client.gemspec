@@ -1,12 +1,18 @@
 Gem::Specification.new do |s|
-  s.name    = 'tiny_client'
-  s.authors = ['TINYpulse swat team']
-  s.version = '0.4.1'
+  s.name    = 'tp_client'
+  s.authors = ['TINYpulse Devops']
+  s.version = '0.1.0'
   s.description = 'TINYclient, an HTTP/JSON crud client toolkit.'
-  s.email = 'jonathan@tinypulse.com'
+  s.email = 'devops@tinypulse.com'
   s.extra_rdoc_files = ['LICENSE', 'README.md']
   s.files = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
 
+  if s.respond_to?(:metadata)
+    s.metadata["allowed_push_host"] = 'https://rubygems.org'
+  else
+    raise "RubyGems 2.0 or newer is required to protect against " \
+      "public gem pushes."
+  end
   #### Load-time details
   s.require_paths = %w(lib ext)
   s.rubyforge_project = 'tiny_client'

@@ -25,8 +25,7 @@ module TinyClient
 
     # @return [Boolean] true if curl verbose option is set
     def verbose
-      @verbose = false if @verbose.nil?
-      @verbose
+      @verbose ||= false
     end
 
     def requestor
