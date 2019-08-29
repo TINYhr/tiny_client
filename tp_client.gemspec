@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name    = 'tp_client'
   s.authors = ['TINYpulse Devops']
-  s.version = '0.1.1'
+  s.version = '0.2.1'
 
   s.summary = 'TINYclient, an HTTP/JSON crud client toolkit.'
   s.description = 'TINYclient is an HTTP/JSON crud toolkit inspired by ActiveRecord and based on Curb.'
@@ -31,5 +31,7 @@ Gem::Specification.new do |s|
   s.license = 'MIT'
 
   s.add_runtime_dependency 'curb', '> 0.7.0', '< 1.0.0'
-  s.add_runtime_dependency 'activesupport', '>= 4.0', '< 6.0'
+  s.add_runtime_dependency 'activesupport', '>= 4.0', '< 7.0'
+
+  s.add_development_dependency "appraisal", '~> 2.2', '>= 2.2.0'
 end

@@ -9,8 +9,20 @@ TINYclient is inspired by [Active Record](http://guides.rubyonrails.org/active_r
 * install the gem
 
 ```sh
-gem install tiny_client
+gem install tp_client
 ```
+
+* Or in Gemfile
+
+```ruby
+# As gem main class is different from gem name, we must require file name explicitly
+gem 'tp_client', '~> 0.1', require: 'tiny_client'
+```
+
+Please notice, we have 2 similar gems:
+
+* [tp_client](https://rubygems.org/gems/tp_client) active, maintained by TINYpulse
+* [tiny_client](https://rubygems.org/gems/tiny_client) inactive. **PLEASE DO NOT USE tiny_client GEM**.
 
 ### Getting Started
 
