@@ -1,7 +1,11 @@
 sudo: false
 language: ruby
 rvm:
-  - 2.4.0
+  - 2.4.3
+gemfile:
+  - gemfiles/activesupport_4.gemfile
+  - gemfiles/activesupport_5.gemfile
+  - gemfiles/activesupport_6.gemfile
 deploy:
   provider: rubygems
   api_key:
