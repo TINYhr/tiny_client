@@ -1,7 +1,7 @@
 sudo: false
 language: ruby
 rvm:
-  - 2.4.3
+  - 2.5.3
 gemfile:
   - gemfiles/activesupport_4.gemfile
   - gemfiles/activesupport_5.gemfile
