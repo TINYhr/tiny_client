@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name    = 'tp_client'
   s.authors = ['TINYpulse Devops']
-  s.version = '0.2.1'
+  s.version = '0.2.2'
 
   s.summary = 'TINYclient, an HTTP/JSON crud client toolkit.'
   s.description = 'TINYclient is an HTTP/JSON crud toolkit inspired by ActiveRecord and based on Curb.'

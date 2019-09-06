@@ -3,6 +3,7 @@
 /.config
 /coverage/
 /gems/
+/gemfiles/gems/
 /InstalledFiles
 /pkg/
 /spec/reports/

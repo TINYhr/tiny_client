@@ -7,7 +7,7 @@ module TinyClient
 
     def initialize(response)
       @response = response
-      @message = "Error #{response.status} occured when calling #{response.url}"
+      super("Error #{response.status} occured when calling #{response.url}")
     end
   end
 end
