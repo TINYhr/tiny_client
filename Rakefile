@@ -1,4 +1,4 @@
-require "bundler/gem_tasks"
+require 'bundler/gem_tasks'
 require 'rake/testtask'
 require 'yard'
 
@@ -16,11 +16,11 @@ end
 
 desc 'Build the gem'
 task gem: [:test] do
-  sh 'gem build tiny_client.gemspec'
+  sh 'gem build tp_client.gemspec'
 end
 
 desc 'Clean up'
 task :clean do
   sh 'rm -rf docs'
-  sh 'rm -f tiny_client*.gem'
+  sh 'rm -f tp_client*.gem'
 end

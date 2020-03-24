@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.name     = 'tp_client'
-  s.version  = '0.2.2'
+  s.version  = '0.2.3'
   s.authors  = ['TINYpulse Devops']
   s.email    = 'devops@tinypulse.com'
 
@@ -27,7 +27,6 @@ Gem::Specification.new do |s|
   s.test_files        = ['test/tiny_client/']
 
   #### Documentation
-  s.has_rdoc         = 'yard'
   s.rdoc_options     = ['--main', 'README.md']
   s.extra_rdoc_files = ['LICENSE', 'README.md']
 
