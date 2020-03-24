@@ -30,7 +30,7 @@ jobs:
     - rvm: 2.7.0
       gemfile: gemfiles/activesupport_5.1.gemfile
   include:
-    - staging: gem release
+    - stage: gem release
       rvm: 2.5.7
       deploy:
         provider: rubygems
