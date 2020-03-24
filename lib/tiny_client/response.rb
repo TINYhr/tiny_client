@@ -48,28 +48,47 @@ module TinyClient
       @code == 404
     end
 
+    # @return true if the HTTP status code of this response correspond to an client error.
     def client_error?
       (400..499).cover?(@code)
     end
 
+    # @return true if the HTTP status code of this response correspond to a server error.
     def server_error?
       @code >= 500
     end
 
+    # @return true if the HTTP status code of this response correspond to a redirect.
     def redirect?
       (300..399).cover?(@code)
     end
 
-    def to_s
+    # @return Hash with url, status, body and headers fields
+    def to_hash
       {
-        url: url,
-        status: status,
-        body: body_str,
-        headers: header_str
-      }.to_s
+        'url'     => url,
+        'status'  => status,
+        'body'    => (parse_body rescue body_str),
+        'headers' => (parse_headers rescue header_str)
+      }
+    end
+
+    # @return String of #to_hash
+    def to_s
+      to_hash.to_s
     end
 
     protected
+
+    def parse_headers
+      {}.tap do |headers|
+        header_str.to_s.each_line do |header|
+          next if header.index(':').nil?
+          key, value = header.split(':', 2)
+          headers[key] = value.to_s.strip
+        end
+      end
+    end
 
     def gzip_decompress
       ActiveSupport::Gzip.decompress(body_str)

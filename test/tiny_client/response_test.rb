@@ -30,6 +30,28 @@ describe TinyClient::Response do
     end
   end
 
+  describe '#to_hash' do
+    let(:header_str) { "HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\n" }
+    let(:body) { { data: { message: 'OK' }, error: false } }
+    let(:status) { '200 OK' }
+
+    it 'includes url' do
+      response.to_hash['url'].must_equal('toto')
+    end
+
+    it 'includes status' do
+      response.to_hash['status'].must_equal('200 OK')
+    end
+
+    it 'includes parsed body' do
+      response.to_hash['body'].must_equal({ 'data' => { 'message' => 'OK' }, 'error' => false })
+    end
+
+    it 'includes parsed headers' do
+      response.to_hash['headers'].must_equal({ 'Content-Type' => 'application/json; charset=utf-8' })
+    end
+  end
+
   describe 'when curb contains a successful (200) json response' do
     let(:body) { { 'toto' => 'Tata' } }
     let(:status) { '200 OK' }
