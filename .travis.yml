@@ -7,29 +7,29 @@ rvm:
   - 2.5.7
   - 2.6.5
   - 2.7.0
-gemfile:
-  - gemfiles/activesupport_4.2.gemfile
-  - gemfiles/activesupport_5.1.gemfile
-  - gemfiles/activesupport_5.2.gemfile
-  - gemfiles/activesupport_6.gemfile
+script: bundle exec rake
 jobs:
   fast_finish: true
-  exclude:
-    - rvm: 2.4.9
-      gemfile: gemfiles/activesupport_5.2.gemfile
-    - rvm: 2.4.9
-      gemfile: gemfiles/activesupport_6.gemfile
-    - rvm: 2.5.7
-      gemfile: gemfiles/activesupport_4.2.gemfile
-    - rvm: 2.6.5
-      gemfile: gemfiles/activesupport_4.2.gemfile
-    - rvm: 2.6.5
-      gemfile: gemfiles/activesupport_5.1.gemfile
-    - rvm: 2.7.0
-      gemfile: gemfiles/activesupport_4.2.gemfile
-    - rvm: 2.7.0
-      gemfile: gemfiles/activesupport_5.1.gemfile
   include:
+    - stage: test
+      rvm: 2.4.9
+      gemfile: gemfiles/activesupport_4.2.gemfile
+    - rvm: 2.4.9
+      gemfile: gemfiles/activesupport_5.1.gemfile
+    - rvm: 2.5.7
+      gemfile: gemfiles/activesupport_5.1.gemfile
+    - rvm: 2.5.7
+      gemfile: gemfiles/activesupport_5.2.gemfile
+    - rvm: 2.5.7
+      gemfile: gemfiles/activesupport_6.0.gemfile
+    - rvm: 2.6.5
+      gemfile: gemfiles/activesupport_5.2.gemfile
+    - rvm: 2.6.5
+      gemfile: gemfiles/activesupport_6.gemfile
+    - rvm: 2.7.0
+      gemfile: gemfiles/activesupport_5.2.gemfile
+    - rvm: 2.7.0
+      gemfile: gemfiles/activesupport_6.gemfile
     - stage: gem release
       rvm: 2.5.7
       deploy:
