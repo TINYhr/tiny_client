@@ -25,7 +25,8 @@ jobs:
       gemfile: gemfiles/activesupport_5.2.gemfile
     - rvm: 2.7.0
       gemfile: gemfiles/activesupport_6.gemfile
-    - stage: Release Gem
+    - if: branch IS master AND tag IS present
+      stage: Release Gem
       rvm: 2.5.7
       gemfile: gemfiles/activesupport_5.1.gemfile
       script: skip
