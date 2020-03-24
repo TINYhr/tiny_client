@@ -1,6 +1,7 @@
 dist: bionic
 sudo: false
 language: ruby
+cache: bundler
 rvm:
   - 2.5.3
   - 2.5.7
@@ -11,6 +12,8 @@ gemfile:
   - gemfiles/activesupport_5.1.gemfile
   - gemfiles/activesupport_5.2.gemfile
   - gemfiles/activesupport_6.gemfile
+env:
+  - BUNDLE_PATH=gemfiles/vendor/bundle
 deploy:
   provider: rubygems
   api_key:

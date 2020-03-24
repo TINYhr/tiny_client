@@ -3,8 +3,9 @@
 /.config
 /coverage/
 /gems/
-/gemfiles/gems/
 /gemfiles/*.lock
+/gemfiles/gems/
+/gemfiles/vendor/bundle
 /InstalledFiles
 /pkg/
 /spec/reports/
