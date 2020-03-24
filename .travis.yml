@@ -27,6 +27,7 @@ jobs:
       gemfile: gemfiles/activesupport_6.gemfile
     - stage: Release Gem
       rvm: 2.5.7
+      script: skip
       deploy:
         provider: rubygems
         gem: tp_client
