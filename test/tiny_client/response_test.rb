@@ -13,6 +13,23 @@ describe TinyClient::Response do
     curb.stubs(body_str: body.to_json, status: status, header_str: header_str, url: 'toto')
   end
 
+  describe '#not_found_error?' do
+    describe 'when HTTP status is 404' do
+      let(:status) { '404 NOT FOUND' }
+      it { response.not_found_error?.must_equal true }
+    end
+
+    describe 'when HTTP status is not 404' do
+      let(:status) { '200 OK' }
+      it { response.not_found_error?.must_equal false }
+    end
+
+    describe 'when HTTP status is 500' do
+      let(:status) { '500 Internal Server Error' }
+      it { response.not_found_error?.must_equal false }
+    end
+  end
+
   describe 'when curb contains a successful (200) json response' do
     let(:body) { { 'toto' => 'Tata' } }
     let(:status) { '200 OK' }
@@ -37,6 +54,7 @@ describe TinyClient::Response do
     it 'create a successful response' do
       response.success?.must_equal false
       response.error?.must_equal true
+      response.not_found_error?.must_equal true
       response.client_error?.must_equal true
       response.code.must_equal 404
       response.parse_body.must_equal body.stringify_keys

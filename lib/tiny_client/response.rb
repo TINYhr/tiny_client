@@ -43,6 +43,11 @@ module TinyClient
       @code >= 400
     end
 
+    # @return true if the HTTP status code of this response is 404
+    def not_found_error?
+      @code == 404
+    end
+
     def client_error?
       (400..499).cover?(@code)
     end
