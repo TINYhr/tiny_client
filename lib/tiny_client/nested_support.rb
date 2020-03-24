@@ -22,14 +22,14 @@ module TinyClient
     def nested_show(resource_class, id, params = {})
       raise ArgumentError, 'Works only for TinyClient::Resource' unless resource_class <= Resource
       path = UrlBuilder.url(resource_class.path).path(id).build!
-      self.class.get(params, @id, path, resource_class)
+      self.class.get(params, id, path, resource_class)
     end
 
     # @raise [ArgumentError] if the given resource_class is not a Resource
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
     def nested_index(resource_class, params = {})
       raise ArgumentError, 'Works only for TinyClient::Resource' unless resource_class <= Resource
-      self.class.get(params, @id, resource_class.path, resource_class)
+      self.class.get(params, id, resource_class.path, resource_class)
     end
 
     # @raise [ArgumentError] if the given resource does not have an id or is not Resource instance
@@ -39,7 +39,7 @@ module TinyClient
       raise ArgumentError, 'resource must have id set' if resource.id.nil?
       path = UrlBuilder.url(resource.class.path).path(resource.id).build!
       data = resource.changes.to_a.each_with_object({}) { |fld, h| h[fld] = resource.send(fld) }
-      self.class.put({ resource.class.low_name => data }, @id, path, resource.class)
+      self.class.put({ resource.class.low_name => data }, id, path, resource.class)
     end
 
     # @raise [ArgumentError] if the given resource does not have an id or is not a Resource instance
