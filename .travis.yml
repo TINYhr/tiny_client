@@ -27,6 +27,7 @@ jobs:
       gemfile: gemfiles/activesupport_6.gemfile
     - stage: Release Gem
       rvm: 2.5.7
+      gemfile: gemfiles/activesupport_5.1.gemfile
       script: skip
       deploy:
         provider: rubygems
