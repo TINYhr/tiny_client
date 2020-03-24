@@ -4,6 +4,7 @@
 /coverage/
 /gems/
 /gemfiles/gems/
+/gemfiles/*.lock
 /InstalledFiles
 /pkg/
 /spec/reports/
