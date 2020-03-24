@@ -7,9 +7,9 @@ describe TinyClient do
   describe 'Dummy Author' do
     let(:author) { Dummy::Author.new }
 
-    it { author.class.nested.must_equal [Dummy::Post] }
-    it { author.must_respond_to :add_post }
-    it { author.must_respond_to :posts }
+    it { _(author.class.nested).must_equal [Dummy::Post] }
+    it { _(author).must_respond_to :add_post }
+    it { _(author).must_respond_to :posts }
 
     describe '#posts' do
       let(:posts) { [{ id: 1, name: 'toto' }] }
@@ -20,9 +20,9 @@ describe TinyClient do
         response
       end
 
-      it { response.count.must_equal 1 }
-      it { response.first.must_be_instance_of Dummy::Post }
-      it { response.first.as_json.must_equal('id' => 1, 'name' => 'toto', 'content' => nil) }
+      it { _(response.count).must_equal 1 }
+      it { _(response.first).must_be_instance_of Dummy::Post }
+      it { _(response.first.as_json).must_equal('id' => 1, 'name' => 'toto', 'content' => nil) }
     end
 
     describe '#add_post' do
@@ -35,9 +35,9 @@ describe TinyClient do
           stub_request(:post, Dummy::Config.instance.url + '/authors/1/posts.json').to_return(body: post.to_json)
         end
 
-        it { response.must_be_instance_of Dummy::Post }
-        it { response.name.must_equal post.name }
-        it { response.content.must_equal post.content }
+        it { _(response).must_be_instance_of Dummy::Post }
+        it { _(response.name).must_equal post.name }
+        it { _(response.content).must_equal post.content }
         it 'create a new post for this author' do
           response
           assert_requested :post, "#{Dummy::Config.instance.url}/authors/1/posts.json",
@@ -52,8 +52,8 @@ describe TinyClient do
           response
         end
 
-        it { response.must_be_nil }
-        it { Dummy::Post.last_response.status.must_equal '204' }
+        it { _(response).must_be_nil }
+        it { _(Dummy::Post.last_response.status).must_equal '204' }
       end
     end
 
@@ -67,20 +67,20 @@ describe TinyClient do
         stub_request(:get, Dummy::Config.instance.url + '/authors/1.json').to_return(body: author1.to_json)
       end
 
-      it { resource.birthday.must_equal author1[:info][:birthday] }
-      it { resource.name.must_equal author1[:name] }
-      it { resource.info.must_equal author1[:info].stringify_keys }
+      it { _(resource.birthday).must_equal author1[:info][:birthday] }
+      it { _(resource.name).must_equal author1[:name] }
+      it { _(resource.info).must_equal author1[:info].stringify_keys }
     end
   end
 
   describe 'Dummy Post' do
     let(:post) { Dummy::Post.new }
 
-    it { Dummy::Post.path.must_equal 'posts' }
-    it { Dummy::Post.fields.must_equal [:id, :name, :content] }
-    it { post.must_respond_to :id }
-    it { post.must_respond_to :name }
-    it { post.must_respond_to :content }
+    it { _(Dummy::Post.path).must_equal 'posts' }
+    it { _(Dummy::Post.fields).must_equal [:id, :name, :content] }
+    it { _(post).must_respond_to :id }
+    it { _(post).must_respond_to :name }
+    it { _(post).must_respond_to :content }
 
     describe '#save!' do
       let(:response) { post.save! }
@@ -93,10 +93,10 @@ describe TinyClient do
             .to_return(body: post.to_json)
           response
         end
-        it { response.must_be_instance_of Dummy::Post }
-        it { response.name.must_equal post.name }
-        it { response.content.must_equal post.content }
-        it { response.changes.must_respond_to(:empty?) }
+        it { _(response).must_be_instance_of Dummy::Post }
+        it { _(response.name).must_equal post.name }
+        it { _(response.content).must_equal post.content }
+        it { _(response.changes).must_respond_to(:empty?) }
         it 'make a post request on the resource path with json content' do
           assert_requested :post, Dummy::Config.instance.url + '/posts.json',
                            body: { post: { name: 'toto', content: 'tata' } }.to_json, headers: { 'Content-Type' => 'application/json' }
@@ -111,7 +111,7 @@ describe TinyClient do
 
       describe 'when the post have an id' do
         before { post.id = 1 }
-        it { destroy!.must_equal post }
+        it { _(destroy!).must_equal post }
         it 'call delete on the post resource' do
           destroy!
           assert_requested :delete, Dummy::Config.instance.url + '/posts/1.json'
@@ -120,7 +120,7 @@ describe TinyClient do
       describe 'when the post does not have an id' do
         before { post.id = nil }
 
-        it { proc { destroy! }.must_raise TinyClient::ResourceError }
+        it { _ { destroy! }.must_raise TinyClient::ResourceError }
       end
     end
 
@@ -132,7 +132,7 @@ describe TinyClient do
         response
       end
 
-      it { response.must_be_instance_of Dummy::Post }
+      it { _(response).must_be_instance_of Dummy::Post }
       it do
         assert_requested :post, Dummy::Config.instance.url + '/posts.json',
                          body: body.to_json, headers: { 'Content-Type' => 'application/json' }
@@ -146,9 +146,9 @@ describe TinyClient do
         before { stub_request(:get, Dummy::Config.instance.url + '/posts.json').to_return(body: posts.to_json) }
         subject { Dummy::Post.index }
 
-        it { subject.count.must_equal 3 }
-        it { subject.first.must_be_instance_of Dummy::Post }
-        it { subject.first.as_json.must_equal posts[0].stringify_keys }
+        it { _(subject.count).must_equal 3 }
+        it { _(subject.first).must_be_instance_of Dummy::Post }
+        it { _(subject.first.as_json).must_equal posts[0].stringify_keys }
       end
 
       describe '#self.show(1)' do
@@ -156,8 +156,8 @@ describe TinyClient do
 
         subject { Dummy::Post.show(1) }
 
-        it { subject.must_be_instance_of Dummy::Post }
-        it { subject.as_json.must_equal posts[0].stringify_keys }
+        it { _(subject).must_be_instance_of Dummy::Post }
+        it { _(subject.as_json).must_equal posts[0].stringify_keys }
         it 'request with proper headers' do
           subject
           assert_requested :get, Dummy::Config.instance.url + '/posts/1.json',
@@ -171,8 +171,8 @@ describe TinyClient do
 
         subject { Dummy::Post.show(1) }
 
-        it { subject.must_be_instance_of Dummy::Post }
-        it { subject.as_json.must_equal posts[0].stringify_keys }
+        it { _(subject).must_be_instance_of Dummy::Post }
+        it { _(subject.as_json).must_equal posts[0].stringify_keys }
         it 'request with proper headers' do
           subject
           assert_requested :get, Dummy::Config.instance.url + '/posts/1.json',

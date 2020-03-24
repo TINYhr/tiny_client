@@ -12,9 +12,6 @@ module TinyClient
     include PaginationSupport
     include NestedSupport
 
-    # A resource always have an id
-    attr_accessor :id
-
     class << self
       # Set this resource client configuration
       # @param [Configuration] config the api url and client default headers.
@@ -157,10 +154,14 @@ module TinyClient
       end
     end
 
+    # A resource always have an id
+    attr_accessor :id
+
     # the fields that has beem modified, and will be save on {save!}
     attr_reader :changes
 
     def initialize(*_args)
+      @id = nil
       @changes = Set.new # store the fields change here
     end
 

@@ -16,17 +16,17 @@ describe TinyClient::Response do
   describe '#not_found_error?' do
     describe 'when HTTP status is 404' do
       let(:status) { '404 NOT FOUND' }
-      it { response.not_found_error?.must_equal true }
+      it { _(response.not_found_error?).must_equal true }
     end
 
     describe 'when HTTP status is not 404' do
       let(:status) { '200 OK' }
-      it { response.not_found_error?.must_equal false }
+      it { _(response.not_found_error?).must_equal false }
     end
 
     describe 'when HTTP status is 500' do
       let(:status) { '500 Internal Server Error' }
-      it { response.not_found_error?.must_equal false }
+      it { _(response.not_found_error?).must_equal false }
     end
   end
 
@@ -36,19 +36,19 @@ describe TinyClient::Response do
     let(:status) { '200 OK' }
 
     it 'includes url' do
-      response.to_hash['url'].must_equal('toto')
+      _(response.to_hash['url']).must_equal('toto')
     end
 
     it 'includes status' do
-      response.to_hash['status'].must_equal('200 OK')
+      _(response.to_hash['status']).must_equal('200 OK')
     end
 
     it 'includes parsed body' do
-      response.to_hash['body'].must_equal({ 'data' => { 'message' => 'OK' }, 'error' => false })
+      _(response.to_hash['body']).must_equal({ 'data' => { 'message' => 'OK' }, 'error' => false })
     end
 
     it 'includes parsed headers' do
-      response.to_hash['headers'].must_equal({ 'Content-Type' => 'application/json; charset=utf-8' })
+      _(response.to_hash['headers']).must_equal({ 'Content-Type' => 'application/json; charset=utf-8' })
     end
   end
 
@@ -57,14 +57,14 @@ describe TinyClient::Response do
     let(:status) { '200 OK' }
 
     it 'create a successful response' do
-      response.must_be :success?
-      response.code.must_equal 200
-      response.url.must_equal 'toto'
+      _(response).must_be :success?
+      _(response.code).must_equal 200
+      _(response.url).must_equal 'toto'
     end
 
     describe '#parse_body' do
       it 'create the proper response body object' do
-        response.parse_body.must_equal body
+        _(response.parse_body).must_equal body
       end
     end
   end
@@ -74,23 +74,23 @@ describe TinyClient::Response do
     let(:status) { '404 NOT FOUND' }
 
     it 'create a successful response' do
-      response.success?.must_equal false
-      response.error?.must_equal true
-      response.not_found_error?.must_equal true
-      response.client_error?.must_equal true
-      response.code.must_equal 404
-      response.parse_body.must_equal body.stringify_keys
-      response.url.must_equal 'toto'
+      _(response.success?).must_equal false
+      _(response.error?).must_equal true
+      _(response.not_found_error?).must_equal true
+      _(response.client_error?).must_equal true
+      _(response.code).must_equal 404
+      _(response.parse_body).must_equal body.stringify_keys
+      _(response.url).must_equal 'toto'
     end
   end
 
   describe 'when curb contains X-Total-Count header' do
     let(:header_str) { 'adfafdafd X-Total-Count: 202' }
-    it { response.total_count.must_equal 202 }
+    it { _(response.total_count).must_equal 202 }
   end
 
   describe 'when curb do not contains X-Total-Count header' do
     let(:header_str) { 'adfafdafd' }
-    it { response.total_count.must_be :nil? }
+    it { _(response.total_count).must_be :nil? }
   end
 end
