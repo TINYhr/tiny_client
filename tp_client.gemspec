@@ -23,7 +23,6 @@ Gem::Specification.new do |s|
     `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   end
   s.require_paths     = %w[lib ext]
-  s.rubyforge_project = 'tiny_client'
   s.test_files        = ['test/tiny_client/']
 
   #### Documentation

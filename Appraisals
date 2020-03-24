@@ -1,9 +1,13 @@
-appraise 'activesupport-4' do
-  gem 'activesupport', '~> 4.0'
+appraise 'activesupport-4.2' do
+  gem 'activesupport', '~> 4.2'
 end
 
-appraise 'activesupport-5' do
-  gem 'activesupport', '~> 5.0'
+appraise 'activesupport-5.1' do
+  gem 'activesupport', '~> 5.1'
+end
+
+appraise 'activesupport-5.2' do
+  gem 'activesupport', '~> 5.2'
 end
 
 appraise 'activesupport-6' do
