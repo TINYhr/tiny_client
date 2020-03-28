@@ -4,14 +4,14 @@ require 'active_support/gzip'
 module TinyClient
   # Wrap the curl request response.
   class Response
-    attr_reader :status, :body_str, :header_str, :url, :code
+    attr_reader :url, :body_str, :header_str, :status, :code
 
     def initialize(curb)
-      @status = curb.status
+      @url = curb.url
       @body_str = curb.body_str
       @header_str = curb.header_str
+      @status = curb.status
       @code = @status.to_i
-      @url = curb.url
     end
 
     # Convert the response json body into an hash.

@@ -4,14 +4,13 @@ module TinyClient
   # Convenient class used to build a request URL.
   class UrlBuilder
     SEPARATOR = '/'.freeze
-    attr_writer :query
 
     def self.url(url)
       new(url)
     end
 
-    def path(path)
-      @path << fix_path(path) unless path.blank?
+    def path(*paths)
+      paths.each { |path| @path << fix_path(path) if path.present? && path != '/' }
       self
     end
 
@@ -21,14 +20,17 @@ module TinyClient
     end
 
     def build!
-      query_s = "?#{@query.to_query}" unless @query.empty?
-      "#{@path.join(SEPARATOR)}.json#{query_s}"
+      url = "#{[@url, @path].join(SEPARATOR)}.json"
+      url.gsub!('//', '/')
+      url = "#{url}?#{@query.to_query}" unless @query.empty?
+      url
     end
 
     private
 
     def initialize(url)
-      @path = [url]
+      @url = url
+      @path = []
       @query = {}
     end
 

@@ -60,7 +60,7 @@ module TinyClient
     end
 
     def build_url(path, id, name)
-      UrlBuilder.url(@config.url).path(path).path(id).path(name)
+      @config.url_builder.path(path, id, name)
     end
   end
 end
