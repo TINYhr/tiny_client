@@ -29,6 +29,12 @@ module TinyClient
       @verbose ||= false
     end
 
+    # @return [String] url using `TinyClient::UrlBuilder` to build url
+    def url_for(*args)
+      query = args.extract_options!
+      url_builder.path(*args).query(query).build
+    end
+
     # @return [TinyClient::UrlBuilder] url_builder
     def url_builder
       TinyClient::UrlBuilder.url(url)

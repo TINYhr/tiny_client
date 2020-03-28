@@ -10,7 +10,10 @@ module TinyClient
     end
 
     def path(*paths)
-      paths.each { |path| @path << fix_path(path) if path.present? && path != '/' }
+      paths.each do |path|
+        new_path = fix_path(path)
+        @path << new_path if new_path.present?
+      end
       self
     end
 
@@ -22,7 +25,6 @@ module TinyClient
     # @return [String] url with all paths and query params
     def build
       url = "#{[@url, @path].join(SEPARATOR)}.json"
-      url.gsub!('//', '/')
       url = "#{url}?#{@query.to_query}" unless @query.empty?
       url
     end
@@ -36,14 +38,27 @@ module TinyClient
     private
 
     def initialize(url)
-      @url = url
+      @url = parse_url(url)
       @path = []
       @query = {}
     end
 
+    def parse_url(url)
+      if url.blank? || url == SEPARATOR
+        ''
+      else
+        url = url[0..-2] if url.end_with?(SEPARATOR)
+        url
+      end
+    end
+
     def fix_path(path)
-      if path.respond_to?(:gsub)
-        path.gsub(/\.json$/, '')
+      case path
+      when String
+        path = path.gsub(/\.json$/, '')
+        path = path[1..-1] if path.start_with?('/')
+        path = path[0..-2] if path.end_with?('/')
+        path
       else
         path
       end
