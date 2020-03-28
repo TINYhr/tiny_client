@@ -19,11 +19,18 @@ module TinyClient
       self
     end
 
-    def build!
+    # @return [String] url with all paths and query params
+    def build
       url = "#{[@url, @path].join(SEPARATOR)}.json"
       url.gsub!('//', '/')
       url = "#{url}?#{@query.to_query}" unless @query.empty?
       url
+    end
+
+    # @deprecated Please use {#build} instead
+    def build!
+      ActiveSupport::Deprecation.warn('`build!` is deprecated. Please use `build` instead')
+      build
     end
 
     private

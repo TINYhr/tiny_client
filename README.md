@@ -16,7 +16,7 @@ gem install tp_client
 
 ```ruby
 # As gem main class is different from gem name, we must require file name explicitly
-gem 'tp_client', '~> 0.1', require: 'tiny_client'
+gem 'tp_client', '~> 0.2.5', require: 'tiny_client'
 ```
 
 Please notice, we have 2 similar gems:
@@ -34,7 +34,6 @@ You can initialize your API by extending the `TinyClient::Configuration`
 
 ```ruby
 class MyConf < TinyClient::Configuration
-
   def initialize
     @url = 'http://localhost:3000/api/1.0'
     @headers = { 'Authorization' => 'token asdfasf4ffsafasdf@12rfsdfa' }
@@ -197,7 +196,7 @@ toto.save! # POST { author: {} }
 Pagination, buffer is achieve through `limit` and `offset` params.
 
 ```
-Author.index_all({limit: 100}) # Will queries the server by batch of 100, until all authors has been retrieved through the enumerator.
+Author.index_all(limit: 100) # Will queries the server by batch of 100, until all authors has been retrieved through the enumerator.
 
 ```
 
