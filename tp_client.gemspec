@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.name     = 'tp_client'
-  s.version  = '0.2.5'
+  s.version  = '0.2.6'
   s.authors  = ['TINYpulse Devops']
   s.email    = 'devops@tinypulse.com'
 
