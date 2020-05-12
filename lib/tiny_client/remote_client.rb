@@ -16,6 +16,18 @@ module TinyClient
       }.merge!(@config.headers), @config.connect_timeout, @config.verbose)
     end
 
+    #    GET /<path>/<id>/<name>?<params>
+    # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
+    # @return [Response]
+    def body_get(path, params, id, name, data)
+      url = @config.url_for(path, id, name, params)
+      verify_json(data)
+      CurbRequestor.perform_body_get(url, {
+        'Accept' => 'application/json',
+        'Content-Type' => 'application/json'
+      }.merge!(@config.headers), data.to_json, @config.connect_timeout, @config.verbose)
+    end
+
     #    POST /<path>/<id>/<name>
     # @param [Hash] data
     # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
