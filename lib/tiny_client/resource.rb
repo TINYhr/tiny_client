@@ -66,7 +66,7 @@ module TinyClient
       # GET /<path>/{id}/<name>
       # @raise [ResponseError] if the server respond with an error status (i.e 404, 500..)
       # @raise [ArgumentError] if data cannot be serialized as a json string ( .to_json )
-      def body_data_get(params = {}, data, id = nil, name = nil, resource_class = nil)
+      def body_data_get(data, params = {}, id = nil, name = nil, resource_class = nil)
         resp = @conf.requestor.body_data_get(@path, params, id, name, data)
         (resource_class || self).from_response resp
       end
