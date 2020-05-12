@@ -23,7 +23,7 @@ module TinyClient
     def body_data_get(path, params, id, name, data)
       url = @config.url_for(path, id, name, params)
       verify_json(data)
-      CurbRequestor.perform_body_get(url, {
+      CurbRequestor.perform_body_data_get(url, {
         'Accept' => 'application/json',
         'Content-Type' => 'application/json'
       }.merge!(@config.headers), data.to_json, @config.connect_timeout, @config.verbose)
