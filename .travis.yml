@@ -7,27 +7,27 @@ jobs:
   fast_finish: true
   include:
     - stage: Test
-      rvm: 2.4.9
+      rvm: 2.4.10
       gemfile: gemfiles/activesupport_4.2.gemfile
-    - rvm: 2.4.9
+    - rvm: 2.4.10
       gemfile: gemfiles/activesupport_5.1.gemfile
-    - rvm: 2.5.7
+    - rvm: 2.5.8
       gemfile: gemfiles/activesupport_5.1.gemfile
-    - rvm: 2.5.7
+    - rvm: 2.5.8
       gemfile: gemfiles/activesupport_5.2.gemfile
-    - rvm: 2.5.7
+    - rvm: 2.5.8
       gemfile: gemfiles/activesupport_6.gemfile
-    - rvm: 2.6.5
+    - rvm: 2.6.6
       gemfile: gemfiles/activesupport_5.2.gemfile
-    - rvm: 2.6.5
+    - rvm: 2.6.6
       gemfile: gemfiles/activesupport_6.gemfile
-    - rvm: 2.7.0
+    - rvm: 2.7.2
       gemfile: gemfiles/activesupport_5.2.gemfile
-    - rvm: 2.7.0
+    - rvm: 2.7.2
       gemfile: gemfiles/activesupport_6.gemfile
     - if: tag IS present
       stage: Release Gem
-      rvm: 2.5.7
+      rvm: 2.5.8
       gemfile: gemfiles/activesupport_5.1.gemfile
       script: skip
       deploy:
