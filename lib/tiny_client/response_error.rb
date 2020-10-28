@@ -9,5 +9,9 @@ module TinyClient
       @response = response
       super("Error #{response.status} occured when calling #{response.url}")
     end
+
+    def to_hash
+      response.to_hash
+    end
   end
 end
