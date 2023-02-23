@@ -16,7 +16,7 @@ gem install tp_client
 
 ```ruby
 # As gem main class is different from gem name, we must require file name explicitly
-gem 'tp_client', '~> 0.2.7', require: 'tiny_client'
+gem 'tp_client', '~> 0.3.0', require: 'tiny_client'
 ```
 
 Please notice, we have 2 similar gems:
