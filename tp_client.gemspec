@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.name     = "tp_client"
-  s.version  = "1.0.0"
+  s.version  = "1.0.1"
   s.authors  = ["TINYpulse DevOps"]
   s.email    = "devops@tinypulse.com"
 
@@ -29,8 +29,6 @@ Gem::Specification.new do |s|
   s.rdoc_options     = ['--main', 'README.md']
   s.extra_rdoc_files = ['LICENSE', 'README.md']
 
-  s.add_runtime_dependency 'curb',          '>= 0.9.11', '< 1.1'
-  s.add_runtime_dependency "activesupport", ">= 4.0",  "< 9"
-
-  s.add_development_dependency 'appraisal', '~> 2.2', '>= 2.2.0'
+  s.add_dependency "curb", ">= 0.9.11", "< 1.1"
+  s.add_dependency "activesupport", ">= 4.0",  "< 9"
 end
